@@ -1,0 +1,62 @@
+{
+  "title": "Laundry room",
+  "address": "Forstmestarinpiha 2, 02610 Espoo",
+  "loading": "Loading…",
+  "login": "Sign in with Google",
+  "logout": "Sign out",
+  "loginHint": "Sign in to see and book laundry slots.",
+  "status": {
+    "new": "Choose your apartment to request access.",
+    "pending": "Waiting for admin approval for {{apartment}}. You can look, but not book yet.",
+    "rejected": "Your request for {{apartment}} was rejected. You can request again.",
+    "revoked": "Your access to {{apartment}} was revoked. You can request again."
+  },
+  "picker": {
+    "label": "Apartment",
+    "choose": "Select…",
+    "taken": "taken",
+    "submit": "Request access"
+  },
+  "calendar": {
+    "usage": "Used {{day}}/{{maxDay}} h this day · {{week}}/{{maxWeek}} h this week",
+    "book": "Book",
+    "cancel": "Cancel",
+    "confirmCancel": "Cancel this booking?",
+    "maintenance": "Maintenance",
+    "maintenanceMode": "Book as maintenance (admin)",
+    "free": "Free",
+    "yours": "yours"
+  },
+  "admin": {
+    "title": "Residents",
+    "email": "Email",
+    "name": "Name",
+    "apartment": "Apartment",
+    "state": "Status",
+    "approve": "Approve",
+    "reject": "Reject",
+    "revoke": "Revoke",
+    "confirmRevoke": "Revoke {{name}}? Their future bookings will be cancelled."
+  },
+  "states": {
+    "new": "new",
+    "pending": "pending",
+    "approved": "approved",
+    "rejected": "rejected",
+    "revoked": "revoked"
+  },
+  "errors": {
+    "invalid_slot": "That is not a valid slot.",
+    "past": "That slot has already started.",
+    "too_far": "You can only book up to 14 days ahead.",
+    "day_limit": "Daily limit reached (2 h per day).",
+    "week_limit": "Weekly limit reached (6 h per week).",
+    "slot_taken": "Someone just booked that slot.",
+    "not_approved": "Your apartment is not approved yet.",
+    "apartment_taken": "That apartment already has an approved resident.",
+    "already_approved": "You are already approved.",
+    "not_pending": "That request is no longer pending.",
+    "forbidden": "Not allowed.",
+    "server_error": "Something went wrong. Try again."
+  }
+}

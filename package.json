@@ -1,0 +1,32 @@
+{
+  "name": "laundry-booking-system",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "bun --watch src/server/dev.ts & vite",
+    "build": "vite build",
+    "typecheck": "tsc --noEmit",
+    "test": "bun test",
+    "db:push": "drizzle-kit push",
+    "db:seed": "bun src/server/seed.ts"
+  },
+  "dependencies": {
+    "@hono/oauth-providers": "^0.9.0",
+    "drizzle-orm": "^0.45.3",
+    "hono": "^4.13.9",
+    "i18next": "^26.4.2",
+    "mysql2": "^3.24.4",
+    "react": "^19.3.0",
+    "react-dom": "^19.3.0",
+    "react-i18next": "^17.0.15"
+  },
+  "devDependencies": {
+    "@types/bun": "^1.4.2",
+    "@types/react": "^19.3.0",
+    "@types/react-dom": "^19.3.0",
+    "@vitejs/plugin-react": "^6.1.1",
+    "drizzle-kit": "^0.31.11",
+    "typescript": "^7.0.2",
+    "vite": "^8.3.1"
+  }
+}

@@ -1,0 +1,11 @@
+node_modules
+dist
+.agents
+.claude
+.idea
+.env
+.vercel
+/AGENTS.md
+/CLAUDE.md
+/CONTEXT.md
+/skills-lock.json

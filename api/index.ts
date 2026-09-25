@@ -1,0 +1,6 @@
+import { handle } from 'hono/vercel'
+import { app } from '../src/server/app.js'
+
+export const GET = handle(app)
+export const POST = handle(app)
+export const DELETE = handle(app)
