@@ -22,4 +22,5 @@ export type AdminUser = {
   status: Status
   apartment: string | null
 }
+export type ThemeChoice = 'light' | 'dark' | 'system'
 export type Run = (fn: () => Promise<unknown>, after?: () => unknown) => Promise<void>

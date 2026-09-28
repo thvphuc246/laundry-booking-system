@@ -21,21 +21,32 @@ export function ApartmentPicker({ run, onDone }: { run: Run; onDone: () => void 
         run(() => api.request('/me/apartment', 'POST', { apartment_id: selected }), onDone)
       }}
     >
-      <label>
-        {t('picker.label')}{' '}
-        <select value={selected} onChange={(e) => setSelected(e.target.value)} required>
-          <option value="">{t('picker.choose')}</option>
+      <fieldset>
+        <legend>{t('picker.label')}</legend>
+        <div className="apartments">
           {list.map((a) => (
-            <option key={a.id} value={a.id} disabled={a.taken}>
-              {a.code}
-              {a.taken ? ` (${t('picker.taken')})` : ''}
-            </option>
+            <label key={a.id} className="apartment">
+              <input
+                type="radio"
+                name="apartment"
+                value={a.id}
+                disabled={a.taken}
+                checked={selected === a.id}
+                onChange={() => setSelected(a.id)}
+              />
+              <span>
+                {a.code}
+                {a.taken && <span className="sr-only"> ({t('picker.taken')})</span>}
+              </span>
+            </label>
           ))}
-        </select>
-      </label>
-      <button type="submit" disabled={!selected}>
-        {t('picker.submit')}
-      </button>
+        </div>
+      </fieldset>
+      <div className="picker-actions">
+        <button type="submit" className="btn large" disabled={!selected}>
+          {t('picker.submit')}
+        </button>
+      </div>
     </form>
   )
 }

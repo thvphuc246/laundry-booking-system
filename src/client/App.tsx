@@ -1,9 +1,12 @@
 import { useCallback, useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { ApiClient, ApiError } from './api'
+import { AccessCard } from './components/AccessCard'
 import { AdminPanel } from './components/AdminPanel'
-import { ApartmentPicker } from './components/ApartmentPicker'
 import { Calendar } from './components/Calendar'
+import { InfoIcon, LogoIcon } from './components/icons'
+import { SignIn } from './components/SignIn'
+import { ThemeSwitch } from './components/ThemeSwitch'
 import type { Me } from './types'
 
 const api = ApiClient.getInstance()
@@ -30,24 +33,34 @@ export function App() {
 
   if (me === undefined)
     return (
-      <main>
+      <main className="app">
         <p>{t('loading')}</p>
       </main>
     )
 
+  if (!me) return <SignIn />
+
+  const approved = me.status === 'approved'
+
   return (
-    <main>
-      <header>
-        <div>
-          <h1>{t('title')}</h1>
-          <small>{t('address')}</small>
+    <main className="app">
+      <header className="top">
+        <div className="brand">
+          <span className="logo">
+            <LogoIcon />
+          </span>
+          <div>
+            <h1>{t('title')}</h1>
+            <span className="address">{t('address')}</span>
+          </div>
         </div>
-        {me && (
-          <div className="who">
-            <span>
-              {me.name}
-              {me.status === 'approved' && me.apartment ? ` · ${me.apartment}` : ''}
-            </span>
+        <div className="header-actions">
+          <ThemeSwitch />
+          <div className="user">
+            <span className="user-name">{me.name}</span>
+            {approved && me.apartment && <span className="chip approved">{me.apartment}</span>}
+            {!approved && <span className={`chip ${me.status}`}>{t(`states.${me.status}`)}</span>}
+            {me.isAdmin && <span className="chip admin">{t('admin.badge')}</span>}
             <button
               type="button"
               className="link"
@@ -61,34 +74,19 @@ export function App() {
               {t('logout')}
             </button>
           </div>
-        )}
+        </div>
       </header>
 
       {error && (
-        <p className="error" role="alert">
+        <p className="alert" role="alert">
+          <InfoIcon />
           {t(`errors.${error}`, { defaultValue: error })}
         </p>
       )}
 
-      {!me ? (
-        <section>
-          <p>{t('loginHint')}</p>
-          <a className="button" href="/api/auth/google">
-            {t('login')}
-          </a>
-        </section>
-      ) : (
-        <>
-          {me.status !== 'approved' && (
-            <p className="notice">{t(`status.${me.status}`, { apartment: me.apartment })}</p>
-          )}
-          {['new', 'rejected', 'revoked'].includes(me.status) && (
-            <ApartmentPicker run={run} onDone={loadMe} />
-          )}
-          <Calendar key={me.status} me={me} run={run} />
-          {me.isAdmin && <AdminPanel run={run} onChange={loadMe} />}
-        </>
-      )}
+      {!approved && <AccessCard me={me} run={run} onDone={loadMe} />}
+      <Calendar key={me.status} me={me} run={run} />
+      {me.isAdmin && <AdminPanel run={run} onChange={loadMe} />}
     </main>
   )
 }

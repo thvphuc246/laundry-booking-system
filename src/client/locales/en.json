@@ -5,6 +5,38 @@
   "login": "Sign in with Google",
   "logout": "Sign out",
   "loginHint": "Sign in to see and book laundry slots.",
+  "theme": {
+    "label": "Theme",
+    "light": "Light",
+    "dark": "Dark",
+    "system": "System"
+  },
+  "signIn": {
+    "title": "Sign in",
+    "firstTime": "First time here? Signing in creates your account. Then choose your apartment and request access.",
+    "howTitle": "How access works",
+    "steps": {
+      "google": {
+        "title": "Sign in with Google",
+        "text": "Your Google account is your login."
+      },
+      "apartment": {
+        "title": "Choose your apartment",
+        "text": "Pick the apartment you live in."
+      },
+      "approval": {
+        "title": "Wait for approval",
+        "text": "An admin confirms you live there. Then you can book."
+      }
+    },
+    "limits": "Book up to {{maxDay}} h a day and {{maxWeek}} h a week, up to {{days}} days ahead."
+  },
+  "steps": {
+    "label": "Access request",
+    "signIn": "Sign in",
+    "apartment": "Choose apartment",
+    "approval": "Admin approval"
+  },
   "status": {
     "new": "Choose your apartment to request access.",
     "pending": "Waiting for admin approval for {{apartment}}. You can look, but not book yet.",
@@ -13,12 +45,14 @@
   },
   "picker": {
     "label": "Apartment",
-    "choose": "Select…",
     "taken": "taken",
     "submit": "Request access"
   },
   "calendar": {
-    "usage": "Used {{day}}/{{maxDay}} h this day · {{week}}/{{maxWeek}} h this week",
+    "days": "Days",
+    "thisDay": "This day",
+    "thisWeek": "This week",
+    "hours": "{{used}} / {{max}} h",
     "book": "Book",
     "cancel": "Cancel",
     "confirmCancel": "Cancel this booking?",
@@ -29,7 +63,7 @@
   },
   "admin": {
     "title": "Residents",
-    "email": "Email",
+    "badge": "Admin",
     "name": "Name",
     "apartment": "Apartment",
     "state": "Status",

@@ -25,14 +25,13 @@ export function AdminPanel({ run, onChange }: { run: Run; onChange: () => void }
   }
 
   return (
-    <section>
+    <section className="residents">
       <h2>{t('admin.title')}</h2>
-      <div className="table-wrap">
+      <div className="card table-wrap">
         <table>
           <thead>
             <tr>
               <th>{t('admin.name')}</th>
-              <th>{t('admin.email')}</th>
               <th>{t('admin.apartment')}</th>
               <th>{t('admin.state')}</th>
               <th />
@@ -41,26 +40,36 @@ export function AdminPanel({ run, onChange }: { run: Run; onChange: () => void }
           <tbody>
             {list.map((u) => (
               <tr key={u.id}>
-                <td>{u.name}</td>
-                <td>{u.email}</td>
-                <td>{u.apartment ?? '–'}</td>
-                <td>{t(`states.${u.status}`)}</td>
-                <td className="actions">
-                  {u.status === 'pending' && (
-                    <>
-                      <button type="button" onClick={() => act(u, 'approve')}>
-                        {t('admin.approve')}
+                <td>
+                  <div className="resident-name">{u.name}</div>
+                  <div className="resident-email">{u.email}</div>
+                </td>
+                <td className="apartment-code">{u.apartment ?? '–'}</td>
+                <td>
+                  <span className={`chip ${u.status}`}>{t(`states.${u.status}`)}</span>
+                </td>
+                <td>
+                  <div className="actions">
+                    {u.status === 'pending' && (
+                      <>
+                        <button type="button" className="btn" onClick={() => act(u, 'approve')}>
+                          {t('admin.approve')}
+                        </button>
+                        <button
+                          type="button"
+                          className="btn secondary"
+                          onClick={() => act(u, 'reject')}
+                        >
+                          {t('admin.reject')}
+                        </button>
+                      </>
+                    )}
+                    {u.status === 'approved' && (
+                      <button type="button" className="btn danger" onClick={() => act(u, 'revoke')}>
+                        {t('admin.revoke')}
                       </button>
-                      <button type="button" onClick={() => act(u, 'reject')}>
-                        {t('admin.reject')}
-                      </button>
-                    </>
-                  )}
-                  {u.status === 'approved' && (
-                    <button type="button" onClick={() => act(u, 'revoke')}>
-                      {t('admin.revoke')}
-                    </button>
-                  )}
+                    )}
+                  </div>
                 </td>
               </tr>
             ))}
