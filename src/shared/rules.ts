@@ -6,8 +6,13 @@ export const MAX_PER_WEEK = 6
 export const BOOK_AHEAD_DAYS = 14
 
 const fmt = new Intl.DateTimeFormat('en-CA', {
-  timeZone: TZ, year: 'numeric', month: '2-digit', day: '2-digit',
-  hour: '2-digit', minute: '2-digit', hourCycle: 'h23',
+  timeZone: TZ,
+  year: 'numeric',
+  month: '2-digit',
+  day: '2-digit',
+  hour: '2-digit',
+  minute: '2-digit',
+  hourCycle: 'h23',
 })
 
 export function helsinki(d: Date) {
@@ -43,7 +48,14 @@ export type RuleError = 'invalid_slot' | 'past' | 'too_far' | 'day_limit' | 'wee
 
 export function slotError(slot: Date, now: Date): RuleError | null {
   const { date, hour, minute } = helsinki(slot)
-  if (minute !== 0 || slot.getUTCSeconds() || slot.getUTCMilliseconds() || hour < OPEN_HOUR || hour >= CLOSE_HOUR) return 'invalid_slot'
+  if (
+    minute !== 0 ||
+    slot.getUTCSeconds() ||
+    slot.getUTCMilliseconds() ||
+    hour < OPEN_HOUR ||
+    hour >= CLOSE_HOUR
+  )
+    return 'invalid_slot'
   if (slot <= now) return 'past'
   if (date > addDays(helsinki(now).date, BOOK_AHEAD_DAYS)) return 'too_far'
   return null
