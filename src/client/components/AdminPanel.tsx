@@ -2,19 +2,25 @@ import { useCallback, useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { ApiClient } from '../api'
 import type { AdminUser, Run } from '../types'
+import { useConfirm } from './ConfirmDialog'
 
 const api = ApiClient.getInstance()
 
 export function AdminPanel({ run, onChange }: { run: Run; onChange: () => void }) {
   const { t } = useTranslation()
+  const ask = useConfirm()
   const [list, setList] = useState<AdminUser[]>([])
   const load = useCallback(() => api.request<AdminUser[]>('/admin/users').then(setList), [])
   useEffect(() => {
     load()
   }, [load])
 
-  const act = (u: AdminUser, action: 'approve' | 'reject' | 'revoke') => {
-    if (action === 'revoke' && !confirm(t('admin.confirmRevoke', { name: u.name }))) return
+  const act = async (u: AdminUser, action: 'approve' | 'reject' | 'revoke') => {
+    if (
+      action === 'revoke' &&
+      !(await ask(t('admin.confirmRevoke', { name: u.name }), t('admin.revoke')))
+    )
+      return
     run(
       () => api.request(`/admin/users/${u.id}/${action}`, 'POST'),
       () => {

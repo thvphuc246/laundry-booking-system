@@ -16,6 +16,7 @@ import {
 } from '../../shared/rules'
 import { ApiClient } from '../api'
 import type { Booking, Me, Run } from '../types'
+import { useConfirm } from './ConfirmDialog'
 import { WrenchIcon } from './icons'
 import { UsageCard } from './UsageCard'
 
@@ -31,6 +32,7 @@ function slotKind(b: Booking | undefined) {
 
 export function Calendar({ me, run }: { me: Me; run: Run }) {
   const { t, i18n } = useTranslation()
+  const ask = useConfirm()
   const today = helsinki(new Date()).date
   const days = Array.from({ length: BOOK_AHEAD_DAYS + 1 }, (_, i) => addDays(today, i))
   const [day, setDay] = useState(today)
@@ -118,10 +120,10 @@ export function Calendar({ me, run }: { me: Me; run: Run }) {
                   <button
                     type="button"
                     className="btn secondary"
-                    onClick={() =>
-                      confirm(t('calendar.confirmCancel')) &&
-                      run(() => api.request(`/bookings/${b.id}`, 'DELETE'), load)
-                    }
+                    onClick={async () => {
+                      if (await ask(t('calendar.confirmCancel'), t('calendar.cancelBooking')))
+                        run(() => api.request(`/bookings/${b.id}`, 'DELETE'), load)
+                    }}
                   >
                     {t('calendar.cancel')}
                   </button>

@@ -1,4 +1,8 @@
 {
+  "appName": "3F2 Laundry Booking",
+  "confirm": {
+    "dismiss": "Go back"
+  },
   "title": "Laundry room",
   "address": "Forstmestarinpiha 2, 02610 Espoo",
   "loading": "Loading…",
@@ -56,6 +60,7 @@
     "book": "Book",
     "cancel": "Cancel",
     "confirmCancel": "Cancel this booking?",
+    "cancelBooking": "Cancel booking",
     "maintenance": "Maintenance",
     "maintenanceMode": "Book as maintenance (admin)",
     "free": "Free",
