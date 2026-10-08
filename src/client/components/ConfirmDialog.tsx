@@ -9,7 +9,8 @@ import {
 } from 'react'
 import { useTranslation } from 'react-i18next'
 
-type Ask = (message: string, confirmLabel: string) => Promise<boolean>
+type Tone = 'primary' | 'danger'
+type Ask = (message: string, confirmLabel: string, tone?: Tone) => Promise<boolean>
 
 const ConfirmContext = createContext<Ask>(() => Promise.resolve(false))
 
@@ -21,11 +22,11 @@ export function ConfirmProvider({ children }: { children: ReactNode }) {
   const messageId = useId()
   const dialog = useRef<HTMLDialogElement>(null)
   const settle = useRef<(ok: boolean) => void>(undefined)
-  const [text, setText] = useState({ message: '', confirmLabel: '' })
+  const [text, setText] = useState({ message: '', confirmLabel: '', tone: 'danger' as Tone })
 
-  const ask = useCallback<Ask>((message, confirmLabel) => {
+  const ask = useCallback<Ask>((message, confirmLabel, tone = 'danger') => {
     settle.current?.(false)
-    setText({ message, confirmLabel })
+    setText({ message, confirmLabel, tone })
     const el = dialog.current
     if (!el) return Promise.resolve(false)
     el.returnValue = ''
@@ -61,7 +62,11 @@ export function ConfirmProvider({ children }: { children: ReactNode }) {
             <button type="submit" value="dismiss" className="btn secondary">
               {t('confirm.dismiss')}
             </button>
-            <button type="submit" value="confirm" className="btn danger">
+            <button
+              type="submit"
+              value="confirm"
+              className={text.tone === 'danger' ? 'btn danger' : 'btn'}
+            >
               {text.confirmLabel}
             </button>
           </div>

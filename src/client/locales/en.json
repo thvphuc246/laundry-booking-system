@@ -53,18 +53,37 @@
     "submit": "Request access"
   },
   "calendar": {
-    "days": "Days",
-    "thisDay": "This day",
     "thisWeek": "This week",
     "hours": "{{used}} / {{max}} h",
     "book": "Book",
-    "cancel": "Cancel",
-    "confirmCancel": "Cancel this booking?",
+    "confirmCancel": "Cancel the booking on {{when}}?",
     "cancelBooking": "Cancel booking",
     "maintenance": "Maintenance",
     "maintenanceMode": "Book as maintenance (admin)",
     "free": "Free",
-    "yours": "yours"
+    "yours": "yours",
+    "nextWeek": "Next week",
+    "weekOf": "Week of {{date}}",
+    "dayUsage": "{{used}} of {{max}} hours booked this day",
+    "confirmBook": "Book the laundry room on {{when}}?",
+    "confirmMaintenance": "Block {{when}} for maintenance?",
+    "taken": "Taken",
+    "past": "past",
+    "pastHint": "This time has passed and can no longer be booked.",
+    "clickToBook": "Select to book.",
+    "clickToCancel": "Select to cancel this booking.",
+    "earliest": "Earliest available",
+    "noneAvailable": "No available slots",
+    "caption": "Laundry slots: one column per day, one row per hour",
+    "time": "Time",
+    "legend": "Legend",
+    "legendItems": {
+      "free": "Free",
+      "mine": "Yours",
+      "taken": "Taken",
+      "maint": "Maintenance",
+      "past": "Past"
+    }
   },
   "admin": {
     "title": "Residents",
