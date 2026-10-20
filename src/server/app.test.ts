@@ -6,6 +6,8 @@ setSystemTime(NOW)
 afterAll(() => setSystemTime())
 
 process.env.SESSION_SECRET = 'test-secret'
+process.env.GOOGLE_ID = 'test-google-id'
+process.env.GOOGLE_SECRET = 'test-google-secret'
 const { app } = await import('./app.js')
 
 const meWith = (sid: string) => app.request('/api/me', { headers: { cookie: `sid=${sid}` } })
