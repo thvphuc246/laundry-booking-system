@@ -14,3 +14,8 @@ test('expired, forged and legacy session cookies are rejected', async () => {
   const legacy = `${id}.c2lnbmF0dXJl`
   for (const sid of [expired, forged, legacy]) expect((await meWith(sid)).status).toBe(401)
 })
+
+test('HTTP errors from middleware keep their status instead of becoming 500', async () => {
+  const res = await app.request('/api/auth/google?code=x&state=forged')
+  expect(res.status).toBe(401)
+})

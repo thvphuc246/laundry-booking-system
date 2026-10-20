@@ -69,3 +69,7 @@ export function limitError(existing: Date[], slot: Date): RuleError | null {
   if (days.filter((d) => weekStart(d) === week).length >= MAX_PER_WEEK) return 'week_limit'
   return null
 }
+
+export function canCancel(slot: Date, mine: boolean, isAdmin: boolean, now: Date) {
+  return slot > now && (mine || isAdmin)
+}

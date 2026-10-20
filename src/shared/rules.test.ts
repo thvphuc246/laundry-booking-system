@@ -1,5 +1,5 @@
 import { expect, test } from 'bun:test'
-import { helsinki, limitError, slotError, toUtc, weekStart } from './rules'
+import { canCancel, helsinki, limitError, slotError, toUtc, weekStart } from './rules'
 
 test('toUtc handles Helsinki DST (UTC+2 winter, UTC+3 summer)', () => {
   expect(toUtc('2026-01-15', 7).toISOString()).toBe('2026-01-15T05:00:00.000Z')
@@ -35,4 +35,14 @@ test('limitError: 2/day, 6/week, Helsinki calendar', () => {
   expect(limitError(six, s('2026-09-27', 7))).toBe('week_limit')
   expect(limitError(six, s('2026-09-28', 7))).toBeNull()
   expect(helsinki(new Date('2026-09-20T21:30:00Z')).date).toBe('2026-09-21')
+})
+
+test('canCancel allows own or admin cancellation of future slots only', () => {
+  const now = new Date('2026-09-21T10:00:00Z')
+  const future = new Date('2026-09-21T11:00:00Z')
+  const past = new Date('2026-09-21T09:00:00Z')
+  expect(canCancel(future, true, false, now)).toBe(true)
+  expect(canCancel(future, false, true, now)).toBe(true)
+  expect(canCancel(future, false, false, now)).toBe(false)
+  expect(canCancel(past, true, true, now)).toBe(false)
 })
