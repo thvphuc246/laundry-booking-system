@@ -1,8 +1,9 @@
 import { googleAuth } from '@hono/oauth-providers/google'
 import { and, asc, eq, gt, gte, lt, ne } from 'drizzle-orm'
 import { Hono } from 'hono'
-import { deleteCookie, getSignedCookie, setSignedCookie } from 'hono/cookie'
+import { deleteCookie, getCookie, setCookie } from 'hono/cookie'
 import { createMiddleware } from 'hono/factory'
+import { sign, verify } from 'hono/jwt'
 import {
   addDays,
   BOOK_AHEAD_DAYS,
@@ -21,6 +22,13 @@ const ADMINS = (process.env.ADMIN_EMAILS ?? '')
   .split(',')
   .map((e) => e.trim().toLowerCase())
   .filter(Boolean)
+const SESSION_SECONDS = 60 * 60 * 24
+
+const sessionUserId = async (token: string | undefined) => {
+  if (!token) return null
+  const payload = await verify(token, SECRET, 'HS256').catch(() => null)
+  return typeof payload?.sub === 'string' ? payload.sub : null
+}
 
 type Env = { Variables: { user: User; isAdmin: boolean } }
 
@@ -38,11 +46,12 @@ app.get('/auth/google', googleAuth({ scope: ['openid', 'email', 'profile'] }), a
   const name = g.name || email
   await db.insert(users).values({ email, name }).onDuplicateKeyUpdate({ set: { name } })
   const [u] = await db.select({ id: users.id }).from(users).where(eq(users.email, email))
-  await setSignedCookie(c, 'sid', u.id, SECRET, {
+  const exp = Math.floor(Date.now() / 1000) + SESSION_SECONDS
+  setCookie(c, 'sid', await sign({ sub: u.id, exp }, SECRET, 'HS256'), {
     path: '/',
     httpOnly: true,
     sameSite: 'Lax',
-    maxAge: 60 * 60 * 24 * 30,
+    maxAge: SESSION_SECONDS,
     secure: new URL(c.req.url).protocol === 'https:',
   })
   return c.redirect('/')
@@ -54,7 +63,7 @@ app.post('/auth/logout', (c) => {
 })
 
 const auth = createMiddleware<Env>(async (c, next) => {
-  const id = await getSignedCookie(c, SECRET, 'sid')
+  const id = await sessionUserId(getCookie(c, 'sid'))
   const [u] = id ? await db.select().from(users).where(eq(users.id, id)) : []
   if (!u) return c.json({ error: 'unauthorized' }, 401)
   c.set('user', u)
@@ -137,8 +146,13 @@ app.get('/bookings', async (c) => {
       ),
     )
   const mine = u.status === 'approved' ? u.apartment_id : null
+  const showApartments = mine != null || c.get('isAdmin')
   return c.json(
-    rows.map(({ apartment_id, ...r }) => ({ ...r, mine: mine != null && apartment_id === mine })),
+    rows.map(({ apartment_id, apartment, ...r }) => ({
+      ...r,
+      apartment: showApartments ? apartment : null,
+      mine: mine != null && apartment_id === mine,
+    })),
   )
 })
 
