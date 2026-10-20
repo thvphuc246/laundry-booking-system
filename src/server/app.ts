@@ -1,11 +1,15 @@
 import { googleAuth } from '@hono/oauth-providers/google'
 import { and, asc, eq, gt, gte, lt, ne } from 'drizzle-orm'
 import { Hono } from 'hono'
-import { deleteCookie, getSignedCookie, setSignedCookie } from 'hono/cookie'
+import { deleteCookie, getCookie, setCookie } from 'hono/cookie'
 import { createMiddleware } from 'hono/factory'
+import { HTTPException } from 'hono/http-exception'
+import { sign, verify } from 'hono/jwt'
+import { validator } from 'hono/validator'
 import {
   addDays,
   BOOK_AHEAD_DAYS,
+  canCancel,
   helsinki,
   limitError,
   slotError,
@@ -21,12 +25,35 @@ const ADMINS = (process.env.ADMIN_EMAILS ?? '')
   .split(',')
   .map((e) => e.trim().toLowerCase())
   .filter(Boolean)
+const SESSION_SECONDS = 60 * 60 * 24
+
+const sessionUserId = async (token: string | undefined) => {
+  if (!token) return null
+  const payload = await verify(token, SECRET, 'HS256').catch(() => null)
+  return typeof payload?.sub === 'string' ? payload.sub : null
+}
 
 type Env = { Variables: { user: User; isAdmin: boolean } }
+
+const residentApartmentId = (u: User) => (u.status === 'approved' ? u.apartment_id : null)
+
+const apartmentBody = validator('json', (v, c) =>
+  typeof v?.apartment_id === 'string'
+    ? { apartmentId: v.apartment_id as string }
+    : c.json({ error: 'invalid_apartment' }, 400),
+)
+
+const slotBody = validator('json', (v, c) => {
+  const slot = new Date(v?.slot_start)
+  if (typeof v?.slot_start !== 'string' || Number.isNaN(slot.getTime()))
+    return c.json({ error: 'invalid_slot' }, 400)
+  return { slot, maintenance: v.maintenance === true }
+})
 
 export const app = new Hono<Env>().basePath('/api')
 
 app.onError((err, c) => {
+  if (err instanceof HTTPException) return err.getResponse()
   console.error(err)
   return c.json({ error: 'server_error' }, 500)
 })
@@ -38,11 +65,12 @@ app.get('/auth/google', googleAuth({ scope: ['openid', 'email', 'profile'] }), a
   const name = g.name || email
   await db.insert(users).values({ email, name }).onDuplicateKeyUpdate({ set: { name } })
   const [u] = await db.select({ id: users.id }).from(users).where(eq(users.email, email))
-  await setSignedCookie(c, 'sid', u.id, SECRET, {
+  const exp = Math.floor(Date.now() / 1000) + SESSION_SECONDS
+  setCookie(c, 'sid', await sign({ sub: u.id, exp }, SECRET, 'HS256'), {
     path: '/',
     httpOnly: true,
     sameSite: 'Lax',
-    maxAge: 60 * 60 * 24 * 30,
+    maxAge: SESSION_SECONDS,
     secure: new URL(c.req.url).protocol === 'https:',
   })
   return c.redirect('/')
@@ -54,7 +82,7 @@ app.post('/auth/logout', (c) => {
 })
 
 const auth = createMiddleware<Env>(async (c, next) => {
-  const id = await getSignedCookie(c, SECRET, 'sid')
+  const id = await sessionUserId(getCookie(c, 'sid'))
   const [u] = id ? await db.select().from(users).where(eq(users.id, id)) : []
   if (!u) return c.json({ error: 'unauthorized' }, 401)
   c.set('user', u)
@@ -96,14 +124,11 @@ app.get('/apartments', async (c) => {
   return c.json(list.map((a) => ({ ...a, taken: taken.has(a.id) })))
 })
 
-app.post('/me/apartment', async (c) => {
+app.post('/me/apartment', apartmentBody, async (c) => {
   const u = c.get('user')
   if (u.status === 'approved') return c.json({ error: 'already_approved' }, 409)
-  const { apartment_id } = await c.req.json<{ apartment_id: string }>()
-  const [apt] = await db
-    .select()
-    .from(apartments)
-    .where(eq(apartments.id, String(apartment_id)))
+  const { apartmentId } = c.req.valid('json')
+  const [apt] = await db.select().from(apartments).where(eq(apartments.id, apartmentId))
   if (!apt) return c.json({ error: 'invalid_apartment' }, 400)
   const [holder] = await db
     .select({ id: users.id })
@@ -136,22 +161,25 @@ app.get('/bookings', async (c) => {
         lt(bookings.slot_start, to),
       ),
     )
-  const mine = u.status === 'approved' ? u.apartment_id : null
+  const mine = residentApartmentId(u)
+  const showApartments = mine != null || c.get('isAdmin')
   return c.json(
-    rows.map(({ apartment_id, ...r }) => ({ ...r, mine: mine != null && apartment_id === mine })),
+    rows.map(({ apartment_id, apartment, ...r }) => ({
+      ...r,
+      apartment: showApartments ? apartment : null,
+      mine: mine != null && apartment_id === mine,
+    })),
   )
 })
 
-app.post('/bookings', async (c) => {
+app.post('/bookings', slotBody, async (c) => {
   const u = c.get('user')
-  const body = await c.req.json<{ slot_start: string; maintenance?: boolean }>()
-  const slot = new Date(body.slot_start)
-  if (Number.isNaN(slot.getTime())) return c.json({ error: 'invalid_slot' }, 400)
+  const { slot, maintenance } = c.req.valid('json')
   const err = slotError(slot, new Date())
   if (err) return c.json({ error: err }, 400)
 
   try {
-    if (body.maintenance) {
+    if (maintenance) {
       if (!c.get('isAdmin')) return c.json({ error: 'forbidden' }, 403)
       await db.insert(bookings).values({
         building_id: BUILDING_ID,
@@ -161,8 +189,8 @@ app.post('/bookings', async (c) => {
       })
       return c.json({ ok: true })
     }
-    const aptId = u.apartment_id
-    if (u.status !== 'approved' || aptId == null) return c.json({ error: 'not_approved' }, 403)
+    const aptId = residentApartmentId(u)
+    if (aptId == null) return c.json({ error: 'not_approved' }, 403)
 
     const limit = await db.transaction(async (tx) => {
       const [apt] = await tx.select().from(apartments).where(eq(apartments.id, aptId)).for('update')
@@ -205,12 +233,9 @@ app.delete('/bookings/:id', async (c) => {
     .from(bookings)
     .where(eq(bookings.id, c.req.param('id')))
   if (!b) return c.json({ error: 'not_found' }, 404)
-  const own =
-    u.status === 'approved' &&
-    b.apartment_id != null &&
-    b.apartment_id === u.apartment_id &&
-    b.slot_start > new Date()
-  if (!own && !c.get('isAdmin')) return c.json({ error: 'forbidden' }, 403)
+  const mine = b.apartment_id != null && b.apartment_id === residentApartmentId(u)
+  if (!canCancel(b.slot_start, mine, c.get('isAdmin'), new Date()))
+    return c.json({ error: 'forbidden' }, 403)
   await db.delete(bookings).where(eq(bookings.id, b.id))
   return c.json({ ok: true })
 })

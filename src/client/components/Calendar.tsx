@@ -4,6 +4,7 @@ import {
   addDays,
   BOOK_AHEAD_DAYS,
   CLOSE_HOUR,
+  canCancel,
   helsinki,
   limitError,
   MAX_PER_DAY,
@@ -84,7 +85,7 @@ export function Calendar({ me, run }: { me: Me; run: Run }) {
       const past = slot <= now
       const blocked = slotError(slot, now) ?? (maintenance ? null : limitError(mine, slot))
       let action: Cell['action'] = null
-      if (booking && !past && (booking.mine || me.isAdmin)) action = 'cancel'
+      if (booking && canCancel(slot, booking.mine, me.isAdmin, now)) action = 'cancel'
       if (!booking && canBook && !blocked) action = 'book'
       return { slot, booking, kind: slotKind(booking), past, blocked, action }
     }),
