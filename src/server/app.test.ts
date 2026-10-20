@@ -1,11 +1,15 @@
-import { expect, test } from 'bun:test'
+import { afterAll, expect, setSystemTime, test } from 'bun:test'
 import { sign } from 'hono/jwt'
+
+const NOW = new Date('2026-09-21T10:00:00Z')
+setSystemTime(NOW)
+afterAll(() => setSystemTime())
 
 process.env.SESSION_SECRET = 'test-secret'
 const { app } = await import('./app.js')
 
 const meWith = (sid: string) => app.request('/api/me', { headers: { cookie: `sid=${sid}` } })
-const now = () => Math.floor(Date.now() / 1000)
+const now = () => Math.floor(NOW.getTime() / 1000)
 
 test('expired, forged and legacy session cookies are rejected', async () => {
   const id = crypto.randomUUID()
