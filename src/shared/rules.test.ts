@@ -1,6 +1,8 @@
 import { expect, test } from 'bun:test'
 import { canCancel, helsinki, limitError, slotError, toUtc, weekStart } from './rules'
 
+const NOW = new Date('2026-09-20T10:00:00Z')
+
 test('toUtc handles Helsinki DST (UTC+2 winter, UTC+3 summer)', () => {
   expect(toUtc('2026-01-15', 7).toISOString()).toBe('2026-01-15T05:00:00.000Z')
   expect(toUtc('2026-07-15', 7).toISOString()).toBe('2026-07-15T04:00:00.000Z')
@@ -29,11 +31,13 @@ test('slotError', () => {
 
 test('limitError: 2/day, 6/week, Helsinki calendar', () => {
   const s = (d: string, h: number) => toUtc(d, h)
-  expect(limitError([s('2026-09-21', 7)], s('2026-09-21', 8))).toBeNull()
-  expect(limitError([s('2026-09-21', 7), s('2026-09-21', 8)], s('2026-09-21', 9))).toBe('day_limit')
+  expect(limitError([s('2026-09-21', 7)], s('2026-09-21', 8), NOW)).toBeNull()
+  expect(limitError([s('2026-09-21', 7), s('2026-09-21', 8)], s('2026-09-21', 9), NOW)).toBe(
+    'day_limit',
+  )
   const six = ['21', '22', '23'].flatMap((d) => [s(`2026-09-${d}`, 7), s(`2026-09-${d}`, 8)])
-  expect(limitError(six, s('2026-09-27', 7))).toBe('week_limit')
-  expect(limitError(six, s('2026-09-28', 7))).toBeNull()
+  expect(limitError(six, s('2026-09-27', 7), NOW)).toBe('week_limit')
+  expect(limitError(six, s('2026-09-28', 7), NOW)).toBeNull()
   expect(helsinki(new Date('2026-09-20T21:30:00Z')).date).toBe('2026-09-21')
 })
 
@@ -45,4 +49,12 @@ test('canCancel allows own or admin cancellation of future slots only', () => {
   expect(canCancel(future, false, true, now)).toBe(true)
   expect(canCancel(future, false, false, now)).toBe(false)
   expect(canCancel(past, true, true, now)).toBe(false)
+})
+
+test('limitError ignores limits for slots starting within 2 h', () => {
+  const hour = (n: number) => new Date(NOW.getTime() + n * 3_600_000)
+  const full = [hour(-2), hour(-1)]
+  expect(limitError(full, hour(1), NOW)).toBeNull()
+  expect(limitError(full, hour(2), NOW)).toBeNull()
+  expect(limitError(full, hour(3), NOW)).toBe('day_limit')
 })

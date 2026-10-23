@@ -33,7 +33,7 @@
         "text": "An admin confirms you live there. Then you can book."
       }
     },
-    "limits": "Book up to {{maxDay}} h a day and {{maxWeek}} h a week, up to {{days}} days ahead."
+    "limits": "Book up to {{maxDay}} h a day and {{maxWeek}} h a week, up to {{days}} days ahead. Slots starting within {{lastMinute}} h ignore these limits."
   },
   "steps": {
     "label": "Access request",
