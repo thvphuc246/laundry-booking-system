@@ -1,0 +1,127 @@
+{
+  "appName": "3F2 Tvättstugebokning",
+  "confirm": {
+    "dismiss": "Tillbaka"
+  },
+  "title": "Tvättstuga",
+  "address": "Forstmestarinpiha 2, 02610 Espoo",
+  "loading": "Laddar…",
+  "login": "Logga in med Google",
+  "logout": "Logga ut",
+  "loginHint": "Logga in för att se och boka tvättider.",
+  "language": "Språk",
+  "theme": {
+    "label": "Tema",
+    "light": "Ljust",
+    "dark": "Mörkt",
+    "system": "System"
+  },
+  "signIn": {
+    "title": "Logga in",
+    "firstTime": "Första gången här? När du loggar in skapas ditt konto. Välj sedan din lägenhet och begär åtkomst.",
+    "howTitle": "Så fungerar åtkomsten",
+    "steps": {
+      "google": {
+        "title": "Logga in med Google",
+        "text": "Ditt Google-konto är din inloggning."
+      },
+      "apartment": {
+        "title": "Välj din lägenhet",
+        "text": "Välj lägenheten du bor i."
+      },
+      "approval": {
+        "title": "Vänta på godkännande",
+        "text": "En administratör bekräftar att du bor där. Sedan kan du boka."
+      }
+    },
+    "limits": "Boka högst {{maxDay}} h per dag och {{maxWeek}} h per vecka, upp till {{days}} dagar i förväg. Tider som börjar inom {{lastMinute}} h omfattas inte av gränserna."
+  },
+  "steps": {
+    "label": "Åtkomstbegäran",
+    "signIn": "Logga in",
+    "apartment": "Välj lägenhet",
+    "approval": "Administratörens godkännande"
+  },
+  "status": {
+    "new": "Välj din lägenhet för att begära åtkomst.",
+    "pending": "Väntar på administratörens godkännande för {{apartment}}. Du kan titta men inte boka ännu.",
+    "rejected": "Din begäran för {{apartment}} avslogs. Du kan begära igen.",
+    "revoked": "Din åtkomst till {{apartment}} återkallades. Du kan begära igen."
+  },
+  "picker": {
+    "label": "Lägenhet",
+    "taken": "upptagen",
+    "submit": "Begär åtkomst"
+  },
+  "calendar": {
+    "thisWeek": "Den här veckan",
+    "hours": "{{used}} / {{max}} h",
+    "book": "Boka",
+    "confirmCancel": "Avboka tiden {{when}}?",
+    "cancelBooking": "Avboka",
+    "maintenance": "Underhåll",
+    "maintenanceMode": "Boka för underhåll (admin)",
+    "free": "Ledig",
+    "yours": "din",
+    "nextWeek": "Nästa vecka",
+    "length": "Bokningens längd",
+    "lengthHours": "{{count}} h",
+    "export": "Lägg till i kalendern",
+    "exportHint": "Ladda ner dina kommande bokningar som en kalenderfil, med en påminnelse 15 minuter före varje.",
+    "exportFile": "tvattstugebokningar.ics",
+    "weekOf": "Veckan från {{date}}",
+    "dayUsage": "{{used}} av {{max}} timmar bokade denna dag",
+    "confirmBook": "Boka tvättstugan {{when}}?",
+    "confirmMaintenance": "Spärra {{when}} för underhåll?",
+    "taken": "Upptagen",
+    "past": "passerad",
+    "pastHint": "Den här tiden har passerat och kan inte längre bokas.",
+    "clickToBook": "Välj för att boka.",
+    "clickToCancel": "Välj för att avboka.",
+    "earliest": "Första lediga",
+    "noneAvailable": "Inga lediga tider",
+    "caption": "Tvättider: en kolumn per dag, en rad per timme",
+    "time": "Tid",
+    "legend": "Teckenförklaring",
+    "legendItems": {
+      "free": "Ledig",
+      "mine": "Din",
+      "taken": "Upptagen",
+      "maint": "Underhåll",
+      "past": "Passerad"
+    }
+  },
+  "admin": {
+    "title": "Boende",
+    "badge": "Admin",
+    "name": "Namn",
+    "apartment": "Lägenhet",
+    "state": "Status",
+    "approve": "Godkänn",
+    "reject": "Avslå",
+    "revoke": "Återkalla",
+    "confirmRevoke": "Återkalla {{name}}? Deras kommande bokningar avbokas."
+  },
+  "states": {
+    "new": "ny",
+    "pending": "väntar",
+    "approved": "godkänd",
+    "rejected": "avslagen",
+    "revoked": "återkallad"
+  },
+  "errors": {
+    "invalid_slot": "Det är ingen giltig tid.",
+    "past": "Den tiden har redan börjat.",
+    "too_far": "Du kan bara boka upp till 14 dagar i förväg.",
+    "day_limit": "Dagsgränsen är nådd (2 h per dag).",
+    "week_limit": "Veckogränsen är nådd (6 h per vecka).",
+    "run_unavailable": "Följande timme kan inte bokas.",
+    "slot_taken": "Någon bokade just den tiden.",
+    "not_approved": "Din lägenhet är inte godkänd ännu.",
+    "apartment_taken": "Lägenheten har redan en godkänd boende.",
+    "already_approved": "Du är redan godkänd.",
+    "not_pending": "Begäran väntar inte längre.",
+    "forbidden": "Inte tillåtet.",
+    "server_error": "Något gick fel. Försök igen."
+  }
+}

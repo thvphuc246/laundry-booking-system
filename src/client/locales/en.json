@@ -9,6 +9,7 @@
   "login": "Sign in with Google",
   "logout": "Sign out",
   "loginHint": "Sign in to see and book laundry slots.",
+  "language": "Language",
   "theme": {
     "label": "Theme",
     "light": "Light",
