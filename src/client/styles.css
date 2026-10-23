@@ -1049,7 +1049,13 @@ td:last-child {
   padding: 32px 40px 64px;
 }
 
-.signin-main .seg {
+.prefs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.signin-main .prefs {
   align-self: flex-end;
 }
 
@@ -1134,7 +1140,7 @@ td:last-child {
     padding: 32px 24px;
   }
 
-  .signin-main .seg {
+  .signin-main .prefs {
     position: absolute;
     top: 24px;
     right: 24px;

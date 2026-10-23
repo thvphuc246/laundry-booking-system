@@ -2,6 +2,7 @@ import { useId } from 'react'
 import { useTranslation } from 'react-i18next'
 import { BOOK_AHEAD_DAYS, LAST_MINUTE_HOURS, MAX_PER_DAY, MAX_PER_WEEK } from '../../shared/rules'
 import { GoogleIcon, LogoIcon } from './icons'
+import { LanguageSwitch } from './LanguageSwitch'
 import { ThemeSwitch } from './ThemeSwitch'
 
 const HOW_STEPS = ['google', 'apartment', 'approval'] as const
@@ -23,7 +24,10 @@ export function SignIn() {
       </section>
 
       <section className="signin-main">
-        <ThemeSwitch />
+        <div className="prefs">
+          <LanguageSwitch />
+          <ThemeSwitch />
+        </div>
         <div className="signin-card">
           <div className="signin-intro">
             <h2>{t('signIn.title')}</h2>

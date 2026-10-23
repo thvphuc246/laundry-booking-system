@@ -1,0 +1,127 @@
+{
+  "appName": "3F2 Pesutupavaraus",
+  "confirm": {
+    "dismiss": "Takaisin"
+  },
+  "title": "Pesutupa",
+  "address": "Forstmestarinpiha 2, 02610 Espoo",
+  "loading": "Ladataan…",
+  "login": "Kirjaudu Googlella",
+  "logout": "Kirjaudu ulos",
+  "loginHint": "Kirjaudu sisään nähdäksesi ja varataksesi pesutupavuoroja.",
+  "language": "Kieli",
+  "theme": {
+    "label": "Teema",
+    "light": "Vaalea",
+    "dark": "Tumma",
+    "system": "Järjestelmä"
+  },
+  "signIn": {
+    "title": "Kirjaudu sisään",
+    "firstTime": "Ensimmäistä kertaa täällä? Kirjautuminen luo tilisi. Valitse sitten asuntosi ja pyydä käyttöoikeutta.",
+    "howTitle": "Näin käyttöoikeus toimii",
+    "steps": {
+      "google": {
+        "title": "Kirjaudu Googlella",
+        "text": "Google-tilisi on tunnuksesi."
+      },
+      "apartment": {
+        "title": "Valitse asuntosi",
+        "text": "Valitse asunto, jossa asut."
+      },
+      "approval": {
+        "title": "Odota hyväksyntää",
+        "text": "Ylläpitäjä vahvistaa, että asut siellä. Sen jälkeen voit varata."
+      }
+    },
+    "limits": "Varaa enintään {{maxDay}} h päivässä ja {{maxWeek}} h viikossa, enintään {{days}} päivää etukäteen. Alle {{lastMinute}} tunnin päästä alkavat vuorot eivät kuulu näihin rajoihin."
+  },
+  "steps": {
+    "label": "Käyttöoikeuspyyntö",
+    "signIn": "Kirjaudu",
+    "apartment": "Valitse asunto",
+    "approval": "Ylläpitäjän hyväksyntä"
+  },
+  "status": {
+    "new": "Valitse asuntosi pyytääksesi käyttöoikeutta.",
+    "pending": "Asunnon {{apartment}} käyttöoikeus odottaa ylläpitäjän hyväksyntää. Voit katsella, mutta et vielä varata.",
+    "rejected": "Pyyntösi asuntoon {{apartment}} hylättiin. Voit pyytää uudelleen.",
+    "revoked": "Käyttöoikeutesi asuntoon {{apartment}} peruttiin. Voit pyytää uudelleen."
+  },
+  "picker": {
+    "label": "Asunto",
+    "taken": "varattu",
+    "submit": "Pyydä käyttöoikeutta"
+  },
+  "calendar": {
+    "thisWeek": "Tämä viikko",
+    "hours": "{{used}} / {{max}} h",
+    "book": "Varaa",
+    "confirmCancel": "Perutaanko varaus {{when}}?",
+    "cancelBooking": "Peru varaus",
+    "maintenance": "Huolto",
+    "maintenanceMode": "Varaa huoltoa varten (ylläpitäjä)",
+    "free": "Vapaa",
+    "yours": "sinun",
+    "nextWeek": "Ensi viikko",
+    "length": "Varauksen pituus",
+    "lengthHours": "{{count}} h",
+    "export": "Lisää kalenteriin",
+    "exportHint": "Lataa tulevat varauksesi kalenteritiedostona, muistutus 15 minuuttia ennen kutakin.",
+    "exportFile": "pesutupavaraukset.ics",
+    "weekOf": "Viikko alkaen {{date}}",
+    "dayUsage": "{{used}} / {{max}} tuntia varattu tänä päivänä",
+    "confirmBook": "Varataanko pesutupa {{when}}?",
+    "confirmMaintenance": "Suljetaanko {{when}} huoltoa varten?",
+    "taken": "Varattu",
+    "past": "mennyt",
+    "pastHint": "Tämä aika on mennyt, eikä sitä voi enää varata.",
+    "clickToBook": "Valitse varataksesi.",
+    "clickToCancel": "Valitse peruaksesi tämän varauksen.",
+    "earliest": "Aikaisin vapaa",
+    "noneAvailable": "Ei vapaita vuoroja",
+    "caption": "Pesutupavuorot: yksi sarake päivää ja yksi rivi tuntia kohden",
+    "time": "Aika",
+    "legend": "Selite",
+    "legendItems": {
+      "free": "Vapaa",
+      "mine": "Sinun",
+      "taken": "Varattu",
+      "maint": "Huolto",
+      "past": "Mennyt"
+    }
+  },
+  "admin": {
+    "title": "Asukkaat",
+    "badge": "Ylläpitäjä",
+    "name": "Nimi",
+    "apartment": "Asunto",
+    "state": "Tila",
+    "approve": "Hyväksy",
+    "reject": "Hylkää",
+    "revoke": "Peru oikeus",
+    "confirmRevoke": "Perutaanko käyttäjän {{name}} oikeus? Hänen tulevat varauksensa perutaan."
+  },
+  "states": {
+    "new": "uusi",
+    "pending": "odottaa",
+    "approved": "hyväksytty",
+    "rejected": "hylätty",
+    "revoked": "peruttu"
+  },
+  "errors": {
+    "invalid_slot": "Vuoro ei ole kelvollinen.",
+    "past": "Vuoro on jo alkanut.",
+    "too_far": "Voit varata enintään 14 päivää etukäteen.",
+    "day_limit": "Päiväraja täynnä (2 h päivässä).",
+    "week_limit": "Viikkoraja täynnä (6 h viikossa).",
+    "run_unavailable": "Seuraavaa tuntia ei voi varata.",
+    "slot_taken": "Joku varasi juuri tämän vuoron.",
+    "not_approved": "Asuntoasi ei ole vielä hyväksytty.",
+    "apartment_taken": "Asunnolla on jo hyväksytty asukas.",
+    "already_approved": "Sinut on jo hyväksytty.",
+    "not_pending": "Pyyntö ei ole enää odottamassa.",
+    "forbidden": "Ei sallittu.",
+    "server_error": "Jokin meni vikaan. Yritä uudelleen."
+  }
+}

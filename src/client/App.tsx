@@ -5,6 +5,7 @@ import { AccessCard } from './components/AccessCard'
 import { AdminPanel } from './components/AdminPanel'
 import { Calendar } from './components/Calendar'
 import { InfoIcon, LogoIcon } from './components/icons'
+import { LanguageSwitch } from './components/LanguageSwitch'
 import { SignIn } from './components/SignIn'
 import { ThemeSwitch } from './components/ThemeSwitch'
 import type { Me } from './types'
@@ -55,7 +56,10 @@ export function App() {
           </div>
         </div>
         <div className="header-actions">
-          <ThemeSwitch />
+          <div className="prefs">
+            <LanguageSwitch />
+            <ThemeSwitch />
+          </div>
           <div className="user">
             <span className="user-name">{me.name}</span>
             {approved && me.apartment && <span className="chip approved">{me.apartment}</span>}
