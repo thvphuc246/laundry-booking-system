@@ -133,6 +133,22 @@ export function ClockIcon() {
   )
 }
 
+export function CalendarIcon() {
+  return (
+    <svg
+      width="18"
+      height="18"
+      viewBox="0 0 24 24"
+      strokeWidth="1.8"
+      {...stroke}
+      aria-hidden="true"
+    >
+      <rect x="3.5" y="5" width="17" height="15.5" rx="2.5" />
+      <path d="M3.5 10h17M8 3v4M16 3v4M12 13v4.5M9.75 15.25h4.5" />
+    </svg>
+  )
+}
+
 export function GoogleIcon() {
   return (
     <svg width="20" height="20" viewBox="0 0 48 48" aria-hidden="true">
