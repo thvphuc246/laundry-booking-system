@@ -11,8 +11,10 @@ import {
   BOOK_AHEAD_DAYS,
   canCancel,
   helsinki,
-  limitError,
+  MAX_RUN_HOURS,
+  runLimitError,
   slotError,
+  slotRun,
   toUtc,
   weekStart,
 } from '../shared/rules.js'
@@ -45,9 +47,16 @@ const apartmentBody = validator('json', (v, c) =>
 
 const slotBody = validator('json', (v, c) => {
   const slot = new Date(v?.slot_start)
-  if (typeof v?.slot_start !== 'string' || Number.isNaN(slot.getTime()))
+  const hours = v?.hours ?? 1
+  if (
+    typeof v?.slot_start !== 'string' ||
+    Number.isNaN(slot.getTime()) ||
+    !Number.isInteger(hours) ||
+    hours < 1 ||
+    hours > MAX_RUN_HOURS
+  )
     return c.json({ error: 'invalid_slot' }, 400)
-  return { slot, maintenance: v.maintenance === true }
+  return { slots: slotRun(slot, hours), maintenance: v.maintenance === true }
 })
 
 export const app = new Hono<Env>().basePath('/api')
@@ -174,20 +183,22 @@ app.get('/bookings', async (c) => {
 
 app.post('/bookings', slotBody, async (c) => {
   const u = c.get('user')
-  const { slot, maintenance } = c.req.valid('json')
+  const { slots, maintenance } = c.req.valid('json')
   const now = new Date()
-  const err = slotError(slot, now)
+  const err = slots.map((s) => slotError(s, now)).find(Boolean)
   if (err) return c.json({ error: err }, 400)
 
   try {
     if (maintenance) {
       if (!c.get('isAdmin')) return c.json({ error: 'forbidden' }, 403)
-      await db.insert(bookings).values({
-        building_id: BUILDING_ID,
-        booked_by_user_id: u.id,
-        slot_start: slot,
-        is_maintenance: true,
-      })
+      await db.insert(bookings).values(
+        slots.map((slot_start) => ({
+          building_id: BUILDING_ID,
+          booked_by_user_id: u.id,
+          slot_start,
+          is_maintenance: true,
+        })),
+      )
       return c.json({ ok: true })
     }
     const aptId = residentApartmentId(u)
@@ -195,7 +206,7 @@ app.post('/bookings', slotBody, async (c) => {
 
     const limit = await db.transaction(async (tx) => {
       const [apt] = await tx.select().from(apartments).where(eq(apartments.id, aptId)).for('update')
-      const week = weekStart(helsinki(slot).date)
+      const week = weekStart(helsinki(slots[0]).date)
       const existing = await tx
         .select({ s: bookings.slot_start })
         .from(bookings)
@@ -206,18 +217,20 @@ app.post('/bookings', slotBody, async (c) => {
             lt(bookings.slot_start, toUtc(addDays(week, 7))),
           ),
         )
-      const e = limitError(
+      const e = runLimitError(
         existing.map((r) => r.s),
-        slot,
+        slots,
         now,
       )
       if (e) return e
-      await tx.insert(bookings).values({
-        building_id: apt.building_id,
-        apartment_id: aptId,
-        booked_by_user_id: u.id,
-        slot_start: slot,
-      })
+      await tx.insert(bookings).values(
+        slots.map((slot_start) => ({
+          building_id: apt.building_id,
+          apartment_id: aptId,
+          booked_by_user_id: u.id,
+          slot_start,
+        })),
+      )
       return null
     })
     if (limit) return c.json({ error: limit }, 409)
