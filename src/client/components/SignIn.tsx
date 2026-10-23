@@ -1,6 +1,6 @@
 import { useId } from 'react'
 import { useTranslation } from 'react-i18next'
-import { BOOK_AHEAD_DAYS, MAX_PER_DAY, MAX_PER_WEEK } from '../../shared/rules'
+import { BOOK_AHEAD_DAYS, LAST_MINUTE_HOURS, MAX_PER_DAY, MAX_PER_WEEK } from '../../shared/rules'
 import { GoogleIcon, LogoIcon } from './icons'
 import { ThemeSwitch } from './ThemeSwitch'
 
@@ -55,6 +55,7 @@ export function SignIn() {
             maxDay: MAX_PER_DAY,
             maxWeek: MAX_PER_WEEK,
             days: BOOK_AHEAD_DAYS,
+            lastMinute: LAST_MINUTE_HOURS,
           })}
         </p>
       </section>

@@ -83,7 +83,7 @@ export function Calendar({ me, run }: { me: Me; run: Run }) {
       const slot = toUtc(d, h)
       const booking = bySlot.get(slot.getTime())
       const past = slot <= now
-      const blocked = slotError(slot, now) ?? (maintenance ? null : limitError(mine, slot))
+      const blocked = slotError(slot, now) ?? (maintenance ? null : limitError(mine, slot, now))
       let action: Cell['action'] = null
       if (booking && canCancel(slot, booking.mine, me.isAdmin, now)) action = 'cancel'
       if (!booking && canBook && !blocked) action = 'book'

@@ -4,6 +4,7 @@ export const CLOSE_HOUR = 22
 export const MAX_PER_DAY = 2
 export const MAX_PER_WEEK = 6
 export const BOOK_AHEAD_DAYS = 14
+export const LAST_MINUTE_HOURS = 2
 
 const fmt = new Intl.DateTimeFormat('en-CA', {
   timeZone: TZ,
@@ -61,7 +62,11 @@ export function slotError(slot: Date, now: Date): RuleError | null {
   return null
 }
 
-export function limitError(existing: Date[], slot: Date): RuleError | null {
+const isLastMinute = (slot: Date, now: Date) =>
+  slot.getTime() - now.getTime() <= LAST_MINUTE_HOURS * 3_600_000
+
+export function limitError(existing: Date[], slot: Date, now: Date): RuleError | null {
+  if (isLastMinute(slot, now)) return null
   const { date } = helsinki(slot)
   const week = weekStart(date)
   const days = existing.map((e) => helsinki(e).date)

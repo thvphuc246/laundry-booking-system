@@ -175,7 +175,8 @@ app.get('/bookings', async (c) => {
 app.post('/bookings', slotBody, async (c) => {
   const u = c.get('user')
   const { slot, maintenance } = c.req.valid('json')
-  const err = slotError(slot, new Date())
+  const now = new Date()
+  const err = slotError(slot, now)
   if (err) return c.json({ error: err }, 400)
 
   try {
@@ -208,6 +209,7 @@ app.post('/bookings', slotBody, async (c) => {
       const e = limitError(
         existing.map((r) => r.s),
         slot,
+        now,
       )
       if (e) return e
       await tx.insert(bookings).values({

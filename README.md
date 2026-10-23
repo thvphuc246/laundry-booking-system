@@ -1,7 +1,7 @@
 # Laundry booking
 
 Book the laundry room for your rental apartment. 1-hour slots, 07–22, max 2 h/day and 6 h/week per apartment
-(Helsinki calendar day, Mon–Sun week), up to 14 days ahead.
+(Helsinki calendar day, Mon–Sun week), up to 14 days ahead. Slots starting within 2 h ignore the limits.
 
 Residents sign in with Google, request an apartment, and an admin (`ADMIN_EMAILS`) approves them. One approved resident per apartment.
 
