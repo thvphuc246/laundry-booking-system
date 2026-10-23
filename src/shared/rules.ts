@@ -5,6 +5,7 @@ export const MAX_PER_DAY = 2
 export const MAX_PER_WEEK = 6
 export const BOOK_AHEAD_DAYS = 14
 export const LAST_MINUTE_HOURS = 2
+export const MAX_RUN_HOURS = MAX_PER_DAY
 
 const fmt = new Intl.DateTimeFormat('en-CA', {
   timeZone: TZ,
@@ -72,6 +73,17 @@ export function limitError(existing: Date[], slot: Date, now: Date): RuleError |
   const days = existing.map((e) => helsinki(e).date)
   if (days.filter((d) => d === date).length >= MAX_PER_DAY) return 'day_limit'
   if (days.filter((d) => weekStart(d) === week).length >= MAX_PER_WEEK) return 'week_limit'
+  return null
+}
+
+export const slotRun = (start: Date, hours: number) =>
+  Array.from({ length: hours }, (_, i) => new Date(start.getTime() + i * 3_600_000))
+
+export function runLimitError(existing: Date[], run: Date[]): RuleError | null {
+  for (const [i, slot] of run.entries()) {
+    const e = limitError([...existing, ...run.slice(0, i)], slot)
+    if (e) return e
+  }
   return null
 }
 

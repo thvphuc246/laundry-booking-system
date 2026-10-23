@@ -6,12 +6,13 @@ import {
   CLOSE_HOUR,
   canCancel,
   helsinki,
-  limitError,
   MAX_PER_DAY,
   MAX_PER_WEEK,
   OPEN_HOUR,
   type RuleError,
+  runLimitError,
   slotError,
+  slotRun,
   TZ,
   toUtc,
   weekStart,
@@ -20,13 +21,14 @@ import { ApiClient } from '../api'
 import type { Booking, Me, Run } from '../types'
 import { useConfirm } from './ConfirmDialog'
 import { ClockIcon, WrenchIcon } from './icons'
+import { LengthSwitch } from './LengthSwitch'
 import { UsageCard } from './UsageCard'
 
 const api = ApiClient.getInstance()
 const pad = (n: number) => String(n).padStart(2, '0')
 const dayMonthLabel = (date: string) => `${date.slice(8, 10)}.${date.slice(5, 7)}`
 // Word joiner keeps the range on one line.
-const timeLabel = (h: number) => `${pad(h)}:00–\u2060${pad(h + 1)}:00`
+const timeLabel = (h: number, hours = 1) => `${pad(h)}:00–\u2060${pad(h + hours)}:00`
 const clamp = (n: number, max: number) => Math.min(Math.max(n, 0), max)
 const reducedMotion = () => window.matchMedia('(prefers-reduced-motion: reduce)').matches
 
@@ -36,7 +38,7 @@ type Cell = {
   booking: Booking | undefined
   kind: Kind
   past: boolean
-  blocked: RuleError | null
+  blocked: RuleError | 'run_unavailable' | null
   action: 'book' | 'cancel' | null
 }
 type Pos = [day: number, hour: number]
@@ -54,6 +56,7 @@ export function Calendar({ me, run }: { me: Me; run: Run }) {
   const [now, setNow] = useState(() => new Date())
   const [bookings, setBookings] = useState<Booking[]>([])
   const [maintenance, setMaintenance] = useState(false)
+  const [length, setLength] = useState(1)
   const [active, setActive] = useState<Pos | null>(null)
   const [flash, setFlash] = useState<number | null>(null)
 
@@ -83,7 +86,12 @@ export function Calendar({ me, run }: { me: Me; run: Run }) {
       const slot = toUtc(d, h)
       const booking = bySlot.get(slot.getTime())
       const past = slot <= now
-      const blocked = slotError(slot, now) ?? (maintenance ? null : limitError(mine, slot, now))
+      const run = slotRun(slot, length)
+      const runUnavailable = run.slice(1).some((s) => bySlot.has(s.getTime()) || slotError(s, now))
+      const blocked =
+        slotError(slot, now) ??
+        (runUnavailable ? 'run_unavailable' : null) ??
+        (maintenance ? null : runLimitError(mine, run))
       let action: Cell['action'] = null
       if (booking && canCancel(slot, booking.mine, me.isAdmin, now)) action = 'cancel'
       if (!booking && canBook && !blocked) action = 'book'
@@ -142,19 +150,25 @@ export function Calendar({ me, run }: { me: Me; run: Run }) {
   }
 
   const act = async (c: Cell, d: string, h: number) => {
-    const when = `${dayLabel(d)}, ${timeLabel(h)}`
     const b = c.booking
     if (c.action === 'cancel' && b) {
+      const when = `${dayLabel(d)}, ${timeLabel(h)}`
       if (await ask(t('calendar.confirmCancel', { when }), t('calendar.cancelBooking')))
         run(() => api.request(`/bookings/${b.id}`, 'DELETE'), load)
     }
     if (c.action === 'book') {
+      const when = `${dayLabel(d)}, ${timeLabel(h, length)}`
       const message = t(maintenance ? 'calendar.confirmMaintenance' : 'calendar.confirmBook', {
         when,
       })
       if (await ask(message, t('calendar.book'), 'primary'))
         run(
-          () => api.request('/bookings', 'POST', { slot_start: c.slot.toISOString(), maintenance }),
+          () =>
+            api.request('/bookings', 'POST', {
+              slot_start: c.slot.toISOString(),
+              hours: length,
+              maintenance,
+            }),
           load,
         )
     }
@@ -223,6 +237,7 @@ export function Calendar({ me, run }: { me: Me; run: Run }) {
             </li>
           ))}
         </ul>
+        {canBook && <LengthSwitch value={length} onChange={setLength} />}
         <button
           type="button"
           className="btn secondary jump"
