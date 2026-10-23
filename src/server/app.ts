@@ -220,7 +220,7 @@ app.post('/bookings', slotBody, async (c) => {
       const e = runLimitError(
         existing.map((r) => r.s),
         slots,
-        now
+        now,
       )
       if (e) return e
       await tx.insert(bookings).values(

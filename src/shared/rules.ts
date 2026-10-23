@@ -79,9 +79,9 @@ export function limitError(existing: Date[], slot: Date, now: Date): RuleError |
 export const slotRun = (start: Date, hours: number) =>
   Array.from({ length: hours }, (_, i) => new Date(start.getTime() + i * 3_600_000))
 
-export function runLimitError(existing: Date[], run: Date[]): RuleError | null {
+export function runLimitError(existing: Date[], run: Date[], now: Date): RuleError | null {
   for (const [i, slot] of run.entries()) {
-    const e = limitError([...existing, ...run.slice(0, i)], slot)
+    const e = limitError([...existing, ...run.slice(0, i)], slot, now)
     if (e) return e
   }
   return null

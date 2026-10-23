@@ -91,7 +91,7 @@ export function Calendar({ me, run }: { me: Me; run: Run }) {
       const blocked =
         slotError(slot, now) ??
         (runUnavailable ? 'run_unavailable' : null) ??
-        (maintenance ? null : runLimitError(mine, run))
+        (maintenance ? null : runLimitError(mine, run, now))
       let action: Cell['action'] = null
       if (booking && canCancel(slot, booking.mine, me.isAdmin, now)) action = 'cancel'
       if (!booking && canBook && !blocked) action = 'book'

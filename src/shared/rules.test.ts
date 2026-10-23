@@ -10,8 +10,6 @@ import {
   weekStart,
 } from './rules'
 
-const NOW = new Date('2026-09-21T10:00:00Z')
-
 const NOW = new Date('2026-09-20T10:00:00Z')
 
 test('toUtc handles Helsinki DST (UTC+2 winter, UTC+3 summer)', () => {
@@ -71,10 +69,12 @@ test('limitError ignores limits for slots starting within 2 h', () => {
 })
 
 test('slotRun lists consecutive hours; runLimitError counts earlier hours of the run', () => {
-  const start = new Date(NOW.getTime() + 3_600_000)
+  const hour = (n: number) => new Date(NOW.getTime() + n * 3_600_000)
+  const start = hour(24)
   const run = slotRun(start, 2)
   expect(run.map((d) => d.getTime() - start.getTime())).toEqual([0, 3_600_000])
-  expect(runLimitError([], run)).toBeNull()
-  expect(runLimitError([NOW], run)).toBe('day_limit')
-  expect(runLimitError([NOW], slotRun(start, 1))).toBeNull()
+  expect(runLimitError([], run, NOW)).toBeNull()
+  expect(runLimitError([hour(23)], run, NOW)).toBe('day_limit')
+  expect(runLimitError([hour(23)], slotRun(start, 1), NOW)).toBeNull()
+  expect(runLimitError([hour(-2), hour(-1)], slotRun(hour(1), 2), NOW)).toBeNull()
 })
