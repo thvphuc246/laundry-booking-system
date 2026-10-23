@@ -20,6 +20,7 @@ import {
 import { ApiClient } from '../api'
 import type { Booking, Me, Run } from '../types'
 import { useConfirm } from './ConfirmDialog'
+import { ExportButton } from './ExportButton'
 import { ClockIcon, WrenchIcon } from './icons'
 import { LengthSwitch } from './LengthSwitch'
 import { UsageCard } from './UsageCard'
@@ -238,6 +239,7 @@ export function Calendar({ me, run }: { me: Me; run: Run }) {
           ))}
         </ul>
         {canBook && <LengthSwitch value={length} onChange={setLength} />}
+        {approved && <ExportButton bookings={bookings} now={now} />}
         <button
           type="button"
           className="btn secondary jump"
