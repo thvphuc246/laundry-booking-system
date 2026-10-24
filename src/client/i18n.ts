@@ -1,5 +1,7 @@
 import i18n from 'i18next'
 import { initReactI18next } from 'react-i18next'
+import { BOOK_AHEAD_DAYS, LAST_MINUTE_HOURS, MAX_PER_DAY, MAX_PER_WEEK } from '../shared/rules'
+import { REMINDER_MINUTES } from './ics'
 import en from './locales/en.json'
 import fi from './locales/fi.json'
 import sv from './locales/sv.json'
@@ -33,13 +35,23 @@ const stored = storedLanguage()
 
 i18n.on('languageChanged', (language) => {
   document.documentElement.lang = language
+  document.title = i18n.t('appName', { lng: language })
 })
 
 i18n.use(initReactI18next).init({
   resources,
   lng: isLanguage(stored) ? stored : (browserLanguage ?? 'en'),
   fallbackLng: 'en',
-  interpolation: { escapeValue: false },
+  interpolation: {
+    escapeValue: false,
+    defaultVariables: {
+      maxDay: MAX_PER_DAY,
+      maxWeek: MAX_PER_WEEK,
+      days: BOOK_AHEAD_DAYS,
+      lastMinute: LAST_MINUTE_HOURS,
+      reminder: REMINDER_MINUTES,
+    },
+  },
 })
 
 export default i18n

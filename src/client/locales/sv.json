@@ -14,7 +14,7 @@
     "label": "Tema",
     "light": "Ljust",
     "dark": "Mörkt",
-    "system": "System"
+    "system": "Följ systemet"
   },
   "signIn": {
     "title": "Logga in",
@@ -31,7 +31,7 @@
       },
       "approval": {
         "title": "Vänta på godkännande",
-        "text": "En administratör bekräftar att du bor där. Sedan kan du boka."
+        "text": "En admin bekräftar att du bor där. Sedan kan du boka."
       }
     },
     "limits": "Boka högst {{maxDay}} h per dag och {{maxWeek}} h per vecka, upp till {{days}} dagar i förväg. Tider som börjar inom {{lastMinute}} h omfattas inte av gränserna."
@@ -40,11 +40,11 @@
     "label": "Åtkomstbegäran",
     "signIn": "Logga in",
     "apartment": "Välj lägenhet",
-    "approval": "Administratörens godkännande"
+    "approval": "Godkännande av admin"
   },
   "status": {
     "new": "Välj din lägenhet för att begära åtkomst.",
-    "pending": "Väntar på administratörens godkännande för {{apartment}}. Du kan titta men inte boka ännu.",
+    "pending": "Väntar på godkännande av admin för {{apartment}}. Du kan titta men inte boka ännu.",
     "rejected": "Din begäran för {{apartment}} avslogs. Du kan begära igen.",
     "revoked": "Din åtkomst till {{apartment}} återkallades. Du kan begära igen."
   },
@@ -67,7 +67,7 @@
     "length": "Bokningens längd",
     "lengthHours": "{{count}} h",
     "export": "Lägg till i kalendern",
-    "exportHint": "Ladda ner dina kommande bokningar som en kalenderfil, med en påminnelse 15 minuter före varje.",
+    "exportHint": "Ladda ner dina kommande bokningar som en kalenderfil, med en påminnelse {{reminder}} minuter före varje.",
     "exportFile": "tvattstugebokningar.ics",
     "weekOf": "Veckan från {{date}}",
     "dayUsage": "{{used}} av {{max}} timmar bokade denna dag",
@@ -100,7 +100,7 @@
     "approve": "Godkänn",
     "reject": "Avslå",
     "revoke": "Återkalla",
-    "confirmRevoke": "Återkalla {{name}}? Deras kommande bokningar avbokas."
+    "confirmRevoke": "Återkalla åtkomsten för {{name}}? Lägenhetens kommande bokningar avbokas."
   },
   "states": {
     "new": "ny",
@@ -112,9 +112,9 @@
   "errors": {
     "invalid_slot": "Det är ingen giltig tid.",
     "past": "Den tiden har redan börjat.",
-    "too_far": "Du kan bara boka upp till 14 dagar i förväg.",
-    "day_limit": "Dagsgränsen är nådd (2 h per dag).",
-    "week_limit": "Veckogränsen är nådd (6 h per vecka).",
+    "too_far": "Du kan bara boka upp till {{days}} dagar i förväg.",
+    "day_limit": "Dagsgränsen är nådd ({{maxDay}} h per dag).",
+    "week_limit": "Veckogränsen är nådd ({{maxWeek}} h per vecka).",
     "run_unavailable": "Följande timme kan inte bokas.",
     "slot_taken": "Någon bokade just den tiden.",
     "not_approved": "Din lägenhet är inte godkänd ännu.",
@@ -122,6 +122,9 @@
     "already_approved": "Du är redan godkänd.",
     "not_pending": "Begäran väntar inte längre.",
     "forbidden": "Inte tillåtet.",
-    "server_error": "Något gick fel. Försök igen."
+    "server_error": "Något gick fel. Försök igen.",
+    "unauthorized": "Din session har gått ut. Logga in igen.",
+    "not_found": "Bokningen finns inte längre.",
+    "invalid_apartment": "Lägenheten finns inte."
   }
 }

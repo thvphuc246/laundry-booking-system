@@ -1,5 +1,6 @@
 import type { Booking } from './types'
 
+export const REMINDER_MINUTES = 15
 const HOUR = 3_600_000
 const stamp = (d: Date) => d.toISOString().replace(/[-:]|\.\d{3}/g, '')
 const text = (s: string) => s.replace(/[;,]/g, (c) => `\\${c}`).replace(/\n/g, '\\n')
@@ -38,7 +39,7 @@ export function bookingsToIcs(bookings: Booking[], summary: string, location: st
       'BEGIN:VALARM',
       'ACTION:DISPLAY',
       `DESCRIPTION:${text(summary)}`,
-      'TRIGGER:-PT15M',
+      `TRIGGER:-PT${REMINDER_MINUTES}M`,
       'END:VALARM',
       'END:VEVENT',
     ]),

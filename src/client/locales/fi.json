@@ -14,7 +14,7 @@
     "label": "Teema",
     "light": "Vaalea",
     "dark": "Tumma",
-    "system": "Järjestelmä"
+    "system": "Järjestelmän mukaan"
   },
   "signIn": {
     "title": "Kirjaudu sisään",
@@ -67,7 +67,7 @@
     "length": "Varauksen pituus",
     "lengthHours": "{{count}} h",
     "export": "Lisää kalenteriin",
-    "exportHint": "Lataa tulevat varauksesi kalenteritiedostona, muistutus 15 minuuttia ennen kutakin.",
+    "exportHint": "Lataa tulevat varauksesi kalenteritiedostona. Jokaiseen tulee muistutus {{reminder}} minuuttia ennen alkua.",
     "exportFile": "pesutupavaraukset.ics",
     "weekOf": "Viikko alkaen {{date}}",
     "dayUsage": "{{used}} / {{max}} tuntia varattu tänä päivänä",
@@ -78,7 +78,7 @@
     "pastHint": "Tämä aika on mennyt, eikä sitä voi enää varata.",
     "clickToBook": "Valitse varataksesi.",
     "clickToCancel": "Valitse peruaksesi tämän varauksen.",
-    "earliest": "Aikaisin vapaa",
+    "earliest": "Ensimmäinen vapaa",
     "noneAvailable": "Ei vapaita vuoroja",
     "caption": "Pesutupavuorot: yksi sarake päivää ja yksi rivi tuntia kohden",
     "time": "Aika",
@@ -100,7 +100,7 @@
     "approve": "Hyväksy",
     "reject": "Hylkää",
     "revoke": "Peru oikeus",
-    "confirmRevoke": "Perutaanko käyttäjän {{name}} oikeus? Hänen tulevat varauksensa perutaan."
+    "confirmRevoke": "Perutaanko käyttäjän {{name}} oikeus? Asunnon tulevat varaukset perutaan."
   },
   "states": {
     "new": "uusi",
@@ -112,9 +112,9 @@
   "errors": {
     "invalid_slot": "Vuoro ei ole kelvollinen.",
     "past": "Vuoro on jo alkanut.",
-    "too_far": "Voit varata enintään 14 päivää etukäteen.",
-    "day_limit": "Päiväraja täynnä (2 h päivässä).",
-    "week_limit": "Viikkoraja täynnä (6 h viikossa).",
+    "too_far": "Voit varata enintään {{days}} päivää etukäteen.",
+    "day_limit": "Päiväraja täynnä ({{maxDay}} h päivässä).",
+    "week_limit": "Viikkoraja täynnä ({{maxWeek}} h viikossa).",
     "run_unavailable": "Seuraavaa tuntia ei voi varata.",
     "slot_taken": "Joku varasi juuri tämän vuoron.",
     "not_approved": "Asuntoasi ei ole vielä hyväksytty.",
@@ -122,6 +122,9 @@
     "already_approved": "Sinut on jo hyväksytty.",
     "not_pending": "Pyyntö ei ole enää odottamassa.",
     "forbidden": "Ei sallittu.",
-    "server_error": "Jokin meni vikaan. Yritä uudelleen."
+    "server_error": "Jokin meni vikaan. Yritä uudelleen.",
+    "unauthorized": "Istuntosi on päättynyt. Kirjaudu uudelleen.",
+    "not_found": "Varausta ei enää ole.",
+    "invalid_apartment": "Asuntoa ei ole."
   }
 }
