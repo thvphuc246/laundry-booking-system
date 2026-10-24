@@ -67,7 +67,7 @@
     "length": "Booking length",
     "lengthHours": "{{count}} h",
     "export": "Add to calendar",
-    "exportHint": "Download your upcoming bookings as a calendar file, with a reminder 15 minutes before each.",
+    "exportHint": "Download your upcoming bookings as a calendar file, with a reminder {{reminder}} minutes before each.",
     "exportFile": "laundry-bookings.ics",
     "weekOf": "Week of {{date}}",
     "dayUsage": "{{used}} of {{max}} hours booked this day",
@@ -100,7 +100,7 @@
     "approve": "Approve",
     "reject": "Reject",
     "revoke": "Revoke",
-    "confirmRevoke": "Revoke {{name}}? Their future bookings will be cancelled."
+    "confirmRevoke": "Revoke {{name}}? The apartment's future bookings will be cancelled."
   },
   "states": {
     "new": "new",
@@ -112,9 +112,9 @@
   "errors": {
     "invalid_slot": "That is not a valid slot.",
     "past": "That slot has already started.",
-    "too_far": "You can only book up to 14 days ahead.",
-    "day_limit": "Daily limit reached (2 h per day).",
-    "week_limit": "Weekly limit reached (6 h per week).",
+    "too_far": "You can only book up to {{days}} days ahead.",
+    "day_limit": "Daily limit reached ({{maxDay}} h per day).",
+    "week_limit": "Weekly limit reached ({{maxWeek}} h per week).",
     "run_unavailable": "The following hour can't be booked.",
     "slot_taken": "Someone just booked that slot.",
     "not_approved": "Your apartment is not approved yet.",
@@ -122,6 +122,9 @@
     "already_approved": "You are already approved.",
     "not_pending": "That request is no longer pending.",
     "forbidden": "Not allowed.",
-    "server_error": "Something went wrong. Try again."
+    "server_error": "Something went wrong. Try again.",
+    "unauthorized": "Your session has ended. Sign in again.",
+    "not_found": "That booking no longer exists.",
+    "invalid_apartment": "That apartment does not exist."
   }
 }
