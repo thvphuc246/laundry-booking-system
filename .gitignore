@@ -3,7 +3,8 @@ dist
 .agents
 .claude
 .idea
-.env
+.env*
+!.env.example
 .vercel
 /AGENTS.md
 /CLAUDE.md
