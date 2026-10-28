@@ -5,4 +5,4 @@ services:
       MYSQL_ROOT_PASSWORD: root
       MYSQL_DATABASE: laundry
     ports:
-      - "3306:3306"
+      - "127.0.0.1:3306:3306"
