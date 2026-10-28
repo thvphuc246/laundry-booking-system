@@ -2,6 +2,7 @@ import { googleAuth } from '@hono/oauth-providers/google'
 import { and, asc, eq, gt, gte, lt, ne } from 'drizzle-orm'
 import { Hono } from 'hono'
 import { deleteCookie, getCookie, setCookie } from 'hono/cookie'
+import { csrf } from 'hono/csrf'
 import { createMiddleware } from 'hono/factory'
 import { HTTPException } from 'hono/http-exception'
 import { sign, verify } from 'hono/jwt'
@@ -66,6 +67,8 @@ app.onError((err, c) => {
   console.error(err)
   return c.json({ error: 'server_error' }, 500)
 })
+
+app.use('*', csrf())
 
 app.get('/auth/google', googleAuth({ scope: ['openid', 'email', 'profile'] }), async (c) => {
   const g = c.get('user-google')

@@ -21,6 +21,13 @@ test('expired, forged and legacy session cookies are rejected', async () => {
   for (const sid of [expired, forged, legacy]) expect((await meWith(sid)).status).toBe(401)
 })
 
+test('cross-site state-changing requests are refused before reaching a route', async () => {
+  const logoutFrom = (origin: string) =>
+    app.request('/api/auth/logout', { method: 'POST', headers: { origin } })
+  expect((await logoutFrom('https://evil.example')).status).toBe(403)
+  expect((await logoutFrom('http://localhost')).status).toBe(200)
+})
+
 test('HTTP errors from middleware keep their status instead of becoming 500', async () => {
   const res = await app.request('/api/auth/google?code=x&state=forged')
   expect(res.status).toBe(401)
