@@ -10,7 +10,11 @@
     "lint": "biome check .",
     "format": "biome check --write .",
     "db:push": "drizzle-kit push",
-    "db:seed": "bun src/server/seed.ts"
+    "db:seed": "bun src/server/seed.ts",
+    "db:mock": "bun src/server/mock.ts",
+    "db:wipe": "bun src/server/wipe.ts",
+    "test:as": "bun src/server/as.ts",
+    "load": "bun src/server/load.ts"
   },
   "dependencies": {
     "@hono/oauth-providers": "^0.9.0",

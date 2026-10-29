@@ -5,6 +5,11 @@ import * as schema from './schema.js'
 const pool = mysql.createPool({ uri: process.env.DATABASE_URL, timezone: 'Z', connectionLimit: 5 })
 export const db = drizzle(pool, { schema, mode: 'default' })
 
+export const ADMINS = (process.env.ADMIN_EMAILS ?? '')
+  .split(',')
+  .map((e) => e.trim().toLowerCase())
+  .filter(Boolean)
+
 export const BUILDING_ID = '6f1c2e0a-3b7d-4c52-9a8e-1d4f5b6c7a80'
 
 export const isDuplicate = (e: unknown): boolean =>
