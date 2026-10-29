@@ -19,15 +19,11 @@ import {
   toUtc,
   weekStart,
 } from '../shared/rules.js'
-import { BUILDING_ID, db, isDuplicate } from './db.js'
+import { ADMINS, BUILDING_ID, db, isDuplicate } from './db.js'
 import { apartments, bookings, type User, users } from './schema.js'
 
 const SECRET = process.env.SESSION_SECRET
 if (!SECRET) throw new Error('SESSION_SECRET is not set')
-const ADMINS = (process.env.ADMIN_EMAILS ?? '')
-  .split(',')
-  .map((e) => e.trim().toLowerCase())
-  .filter(Boolean)
 const SESSION_SECONDS = 60 * 60 * 24
 
 const sessionUserId = async (token: string | undefined) => {
