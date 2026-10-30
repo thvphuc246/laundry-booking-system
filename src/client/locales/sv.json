@@ -119,6 +119,7 @@
     "slot_taken": "Någon bokade just den tiden.",
     "not_approved": "Din lägenhet är inte godkänd ännu.",
     "apartment_taken": "Lägenheten har redan en godkänd boende.",
+    "apartment_changed": "Den boende har ändrat sin lägenhetsbegäran. Ladda om sidan och kontrollera den igen.",
     "already_approved": "Du är redan godkänd.",
     "not_pending": "Begäran väntar inte längre.",
     "forbidden": "Inte tillåtet.",
