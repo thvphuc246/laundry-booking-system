@@ -119,6 +119,7 @@
     "slot_taken": "Someone just booked that slot.",
     "not_approved": "Your apartment is not approved yet.",
     "apartment_taken": "That apartment already has an approved resident.",
+    "apartment_changed": "That resident changed their apartment request. Reload and check it again.",
     "already_approved": "You are already approved.",
     "not_pending": "That request is no longer pending.",
     "forbidden": "Not allowed.",

@@ -42,6 +42,10 @@ const apartmentBody = validator('json', (v, c) =>
     : c.json({ error: 'invalid_apartment' }, 400),
 )
 
+const adminActionBody = validator('json', (v) => ({
+  apartment: typeof v?.apartment === 'string' ? (v.apartment as string) : undefined,
+}))
+
 const slotBody = validator('json', (v, c) => {
   const slot = new Date(v?.slot_start)
   const hours = v?.hours ?? 1
@@ -269,7 +273,7 @@ app.get('/admin/users', async (c) => {
   return c.json(rows)
 })
 
-app.post('/admin/users/:id/:action{approve|reject|revoke}', async (c) => {
+app.post('/admin/users/:id/:action{approve|reject|revoke}', adminActionBody, async (c) => {
   const [t] = await db
     .select()
     .from(users)
@@ -281,16 +285,30 @@ app.post('/admin/users/:id/:action{approve|reject|revoke}', async (c) => {
     if (t.status !== 'pending' || t.apartment_id == null)
       return c.json({ error: 'not_pending' }, 409)
     const aptId = t.apartment_id
+    const [apt] = await db
+      .select({ code: apartments.code })
+      .from(apartments)
+      .where(eq(apartments.id, aptId))
+    const { apartment } = c.req.valid('json')
+    if (!apt || apartment !== apt.code) return c.json({ error: 'apartment_changed' }, 409)
     try {
-      await db.transaction(async (tx) => {
-        await tx.update(users).set({ status: 'approved' }).where(eq(users.id, t.id))
+      const approved = await db.transaction(async (tx) => {
+        const [result] = await tx
+          .update(users)
+          .set({ status: 'approved' })
+          .where(
+            and(eq(users.id, t.id), eq(users.status, 'pending'), eq(users.apartment_id, aptId)),
+          )
+        if (result.affectedRows === 0) return false
         await tx
           .update(users)
           .set({ status: 'rejected' })
           .where(
             and(eq(users.apartment_id, aptId), eq(users.status, 'pending'), ne(users.id, t.id)),
           )
+        return true
       })
+      if (!approved) return c.json({ error: 'apartment_changed' }, 409)
     } catch (e) {
       if (isDuplicate(e)) return c.json({ error: 'apartment_taken' }, 409)
       throw e

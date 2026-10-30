@@ -119,6 +119,7 @@
     "slot_taken": "Joku varasi juuri tämän vuoron.",
     "not_approved": "Asuntoasi ei ole vielä hyväksytty.",
     "apartment_taken": "Asunnolla on jo hyväksytty asukas.",
+    "apartment_changed": "Asukas on vaihtanut asuntopyyntöään. Lataa sivu uudelleen ja tarkista pyyntö.",
     "already_approved": "Sinut on jo hyväksytty.",
     "not_pending": "Pyyntö ei ole enää odottamassa.",
     "forbidden": "Ei sallittu.",

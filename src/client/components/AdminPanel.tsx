@@ -22,7 +22,12 @@ export function AdminPanel({ run, onChange }: { run: Run; onChange: () => void }
     )
       return
     run(
-      () => api.request(`/admin/users/${u.id}/${action}`, 'POST'),
+      () =>
+        api.request(
+          `/admin/users/${u.id}/${action}`,
+          'POST',
+          action === 'approve' ? { apartment: u.apartment } : undefined,
+        ),
       () => {
         load()
         onChange()
