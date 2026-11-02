@@ -44,7 +44,7 @@
   },
   "status": {
     "new": "Välj din lägenhet för att begära åtkomst.",
-    "pending": "Väntar på godkännande av admin för {{apartment}}. Du kan titta men inte boka ännu.",
+    "pending": "Väntar på godkännande av admin för {{apartment}}. Kalendern öppnas när du har godkänts.",
     "rejected": "Din begäran för {{apartment}} avslogs. Du kan begära igen.",
     "revoked": "Din åtkomst till {{apartment}} återkallades. Du kan begära igen."
   },
@@ -89,7 +89,8 @@
       "taken": "Upptagen",
       "maint": "Underhåll",
       "past": "Passerad"
-    }
+    },
+    "hoursLeft": "{{left}} / {{max}} h kvar"
   },
   "admin": {
     "title": "Boende",
@@ -127,5 +128,21 @@
     "unauthorized": "Din session har gått ut. Logga in igen.",
     "not_found": "Bokningen finns inte längre.",
     "invalid_apartment": "Lägenheten finns inte."
+  },
+  "nav": {
+    "label": "Vyer",
+    "mine": "Min tvätt",
+    "calendar": "Kalender"
+  },
+  "mine": {
+    "today": "I dag",
+    "usedSoFar": "Inklusive {{count}} h som redan använts denna vecka.",
+    "lastMinute": "Tider som börjar inom {{hours}} h omfattas inte av gränserna, så du kan fortfarande boka.",
+    "upcoming": "Dina bokningar",
+    "empty": "Inga bokningar än.",
+    "bookSlot": "Boka en tid",
+    "now": "Nu",
+    "cancelNotice": "En administratör avbokade din bokning {{when}}.",
+    "dismiss": "Stäng"
   }
 }

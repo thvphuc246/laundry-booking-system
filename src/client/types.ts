@@ -14,6 +14,8 @@ export type Booking = {
   maintenance: boolean
   mine: boolean
 }
+export type Notice = { id: string; slot_start: string }
+export type BookingRun = { bookings: Booking[]; start: Date; end: Date }
 export type Apartment = { id: string; code: string; taken: boolean }
 export type AdminUser = {
   id: string

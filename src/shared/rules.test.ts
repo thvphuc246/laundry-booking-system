@@ -2,6 +2,7 @@ import { expect, test } from 'bun:test'
 import {
   canCancel,
   helsinki,
+  hoursLeft,
   limitError,
   runLimitError,
   slotError,
@@ -48,6 +49,24 @@ test('limitError: 2/day, 6/week, Helsinki calendar', () => {
   expect(limitError(six, s('2026-09-27', 7), NOW)).toBe('week_limit')
   expect(limitError(six, s('2026-09-28', 7), NOW)).toBeNull()
   expect(helsinki(new Date('2026-09-20T21:30:00Z')).date).toBe('2026-09-21')
+})
+
+test('hoursLeft counts day and week capacity', () => {
+  const s = (d: string, h: number) => toUtc(d, h)
+  expect(hoursLeft([], '2026-09-21')).toEqual({ day: 2, week: 6 })
+  expect(hoursLeft([s('2026-09-21', 7), s('2026-09-21', 8)], '2026-09-21')).toEqual({
+    day: 0,
+    week: 4,
+  })
+  const six = ['21', '22', '23'].flatMap((d) => [s(`2026-09-${d}`, 7), s(`2026-09-${d}`, 8)])
+  expect(hoursLeft(six, '2026-09-27')).toEqual({ day: 2, week: 0 })
+  expect(
+    hoursLeft([...six, s('2026-09-27', 7), s('2026-09-27', 8), s('2026-09-27', 9)], '2026-09-27'),
+  ).toEqual({
+    day: 0,
+    week: 0,
+  })
+  expect(hoursLeft([s('2026-09-14', 7)], '2026-09-21')).toEqual({ day: 2, week: 6 })
 })
 
 test('canCancel allows own or admin cancellation of future slots only', () => {

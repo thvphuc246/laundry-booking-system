@@ -229,11 +229,11 @@ const freeSlots = (booked: Set<number>, now: Date) => {
 
 async function visit(r: Resident) {
   await call(r, 'GET /me', '/me')
-  const { slots = [] } = await call(r, 'GET /bookings', '/bookings')
   if (r.status !== 'approved') {
     await call(r, 'GET /apartments', '/apartments')
     return
   }
+  const { slots = [] } = await call(r, 'GET /bookings', '/bookings')
   const free = freeSlots(new Set(slots.map((b) => new Date(b.slot_start).getTime())), new Date())
   const slot = free[Math.floor(Math.random() * free.length)]
   if (slot) await book(r, 'POST /bookings', slot)

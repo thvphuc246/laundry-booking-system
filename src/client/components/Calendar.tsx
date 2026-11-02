@@ -6,6 +6,7 @@ import {
   CLOSE_HOUR,
   canCancel,
   helsinki,
+  hoursLeft,
   MAX_PER_DAY,
   MAX_PER_WEEK,
   OPEN_HOUR,
@@ -13,12 +14,13 @@ import {
   runLimitError,
   slotError,
   slotRun,
-  TZ,
   toUtc,
   weekStart,
 } from '../../shared/rules'
 import { ApiClient } from '../api'
+import { dayMonthLabel, dayLabel as formatDayLabel, pad, timeLabel, weekdayFormat } from '../format'
 import type { Booking, Me, Run } from '../types'
+import { useNow } from '../useNow'
 import { useConfirm } from './ConfirmDialog'
 import { ExportButton } from './ExportButton'
 import { ClockIcon, WrenchIcon } from './icons'
@@ -26,10 +28,7 @@ import { LengthSwitch } from './LengthSwitch'
 import { UsageCard } from './UsageCard'
 
 const api = ApiClient.getInstance()
-const pad = (n: number) => String(n).padStart(2, '0')
-const dayMonthLabel = (date: string) => `${date.slice(8, 10)}.${date.slice(5, 7)}`
-// Word joiner keeps the range on one line.
-const timeLabel = (h: number, hours = 1) => `${pad(h)}:00–\u2060${pad(h + hours)}:00`
+const pipIds = Array.from({ length: MAX_PER_DAY }, (_, i) => `pip-${i}`)
 const clamp = (n: number, max: number) => Math.min(Math.max(n, 0), max)
 const reducedMotion = () => window.matchMedia('(prefers-reduced-motion: reduce)').matches
 
@@ -50,26 +49,39 @@ function slotKind(b: Booking | undefined): Kind {
   return b.mine ? 'mine' : 'taken'
 }
 
-export function Calendar({ me, run }: { me: Me; run: Run }) {
+export function Calendar({
+  me,
+  run,
+  jumpOnLoad,
+  onJumped,
+}: {
+  me: Me
+  run: Run
+  jumpOnLoad: boolean
+  onJumped: () => void
+}) {
   const { t, i18n } = useTranslation()
   const ask = useConfirm()
   const table = useRef<HTMLTableElement>(null)
-  const [now, setNow] = useState(() => new Date())
+  const now = useNow()
   const [bookings, setBookings] = useState<Booking[]>([])
+  const [loaded, setLoaded] = useState(false)
   const [maintenance, setMaintenance] = useState(false)
   const [length, setLength] = useState(1)
   const [active, setActive] = useState<Pos | null>(null)
   const [flash, setFlash] = useState<number | null>(null)
 
-  const load = useCallback(() => api.request<Booking[]>('/bookings').then(setBookings), [])
+  const load = useCallback(
+    () =>
+      api.request<Booking[]>('/bookings').then((rows) => {
+        setBookings(rows)
+        setLoaded(true)
+      }),
+    [],
+  )
   useEffect(() => {
     load()
   }, [load])
-  // Keep "past" up to date while the page stays open.
-  useEffect(() => {
-    const id = setInterval(() => setNow(new Date()), 30_000)
-    return () => clearInterval(id)
-  }, [])
 
   const today = helsinki(now).date
   const days = Array.from({ length: BOOK_AHEAD_DAYS + 1 }, (_, i) => addDays(today, i))
@@ -100,7 +112,6 @@ export function Calendar({ me, run }: { me: Me; run: Run }) {
     }),
   )
 
-  // Earliest slot this user could book right now (or, if they can't book, the earliest free one).
   let earliest: Pos | null = null
   for (let di = 0; di < days.length && !earliest; di++)
     for (let hi = 0; hi < hours.length && !earliest; hi++) {
@@ -110,18 +121,21 @@ export function Calendar({ me, run }: { me: Me; run: Run }) {
 
   const [focusDay, focusHour] = active ?? earliest ?? [0, 0]
 
-  const weekday = new Intl.DateTimeFormat(i18n.language, { timeZone: TZ, weekday: 'short' })
-  const dayLabel = (d: string) => `${weekday.format(toUtc(d, 12))} ${dayMonthLabel(d)}`
+  const weekday = weekdayFormat(i18n.language)
+  const dayLabel = (d: string) => formatDayLabel(d, i18n.language)
 
-  const cellAt = (di: number, hi: number) =>
-    table.current?.querySelector<HTMLButtonElement>(`[data-pos="${di}-${hi}"]`)
+  const cellAt = useCallback(
+    (di: number, hi: number) =>
+      table.current?.querySelector<HTMLButtonElement>(`[data-pos="${di}-${hi}"]`),
+    [],
+  )
 
   const focusCell = (di: number, hi: number) => {
     setActive([di, hi])
     cellAt(di, hi)?.focus()
   }
 
-  const jumpToEarliest = () => {
+  const jumpToEarliest = useCallback(() => {
     if (!earliest) return
     const [di, hi] = earliest
     const el = cellAt(di, hi)
@@ -133,7 +147,13 @@ export function Calendar({ me, run }: { me: Me; run: Run }) {
       inline: 'center',
     })
     el?.focus({ preventScroll: true })
-  }
+  }, [cellAt, earliest, grid])
+
+  useEffect(() => {
+    if (!jumpOnLoad || !loaded) return
+    jumpToEarliest()
+    onJumped()
+  }, [jumpOnLoad, loaded, jumpToEarliest, onJumped])
 
   const onKeyDown = (e: KeyboardEvent<HTMLTableSectionElement>) => {
     const moves: Record<string, Pos> = {
@@ -208,7 +228,7 @@ export function Calendar({ me, run }: { me: Me; run: Run }) {
             <UsageCard
               key={w}
               label={weekLabel(w, i)}
-              used={mineDays.filter((d) => weekStart(d) === w).length}
+              left={hoursLeft(mine, w).week}
               max={MAX_PER_WEEK}
             />
           ))}
@@ -285,9 +305,8 @@ export function Calendar({ me, run }: { me: Me; run: Run }) {
                         role="img"
                         aria-label={t('calendar.dayUsage', { used, max: MAX_PER_DAY })}
                       >
-                        {Array.from({ length: MAX_PER_DAY }, (_, i) => (
-                          // biome-ignore lint/suspicious/noArrayIndexKey: fixed-length decoration
-                          <span key={i} className={i < used ? 'pip on' : 'pip'} />
+                        {pipIds.map((id, i) => (
+                          <span key={id} className={i < used ? 'pip on' : 'pip'} />
                         ))}
                       </span>
                     )}

@@ -6,6 +6,7 @@ import { AdminPanel } from './components/AdminPanel'
 import { Calendar } from './components/Calendar'
 import { InfoIcon, LogoIcon } from './components/icons'
 import { LanguageSwitch } from './components/LanguageSwitch'
+import { MyLaundry } from './components/MyLaundry'
 import { SignIn } from './components/SignIn'
 import { ThemeSwitch } from './components/ThemeSwitch'
 import type { Me } from './types'
@@ -16,11 +17,18 @@ export function App() {
   const { t } = useTranslation()
   const [me, setMe] = useState<Me | null | undefined>(undefined)
   const [error, setError] = useState<string | null>(null)
+  const [hash, setHash] = useState(() => location.hash)
 
   const loadMe = useCallback(() => api.request<Me>('/me').then(setMe, () => setMe(null)), [])
   useEffect(() => {
     loadMe()
   }, [loadMe])
+
+  useEffect(() => {
+    const onHashChange = () => setHash(location.hash)
+    addEventListener('hashchange', onHashChange)
+    return () => removeEventListener('hashchange', onHashChange)
+  }, [])
 
   const run = useCallback(async (fn: () => Promise<unknown>, after?: () => unknown) => {
     setError(null)
@@ -30,6 +38,10 @@ export function App() {
       setError(e instanceof ApiError ? e.message : 'server_error')
     }
     await after?.()
+  }, [])
+  const clearJump = useCallback(() => {
+    history.replaceState(null, '', '#/calendar')
+    setHash('#/calendar')
   }, [])
 
   if (me === undefined)
@@ -42,6 +54,8 @@ export function App() {
   if (!me) return <SignIn />
 
   const approved = me.status === 'approved'
+  const showCalendar = approved || me.isAdmin
+  const view = approved && !hash.startsWith('#/calendar') ? 'mine' : 'calendar'
 
   return (
     <main className="app">
@@ -88,9 +102,34 @@ export function App() {
         </p>
       )}
 
-      {!approved && <AccessCard me={me} run={run} onDone={loadMe} />}
-      <Calendar key={me.status} me={me} run={run} />
-      {me.isAdmin && <AdminPanel run={run} onChange={loadMe} />}
+      {approved && (
+        <nav className="tabs" aria-label={t('nav.label')}>
+          <a href="#/" aria-current={view === 'mine' ? 'page' : undefined}>
+            {t('nav.mine')}
+          </a>
+          <a href="#/calendar" aria-current={view === 'calendar' ? 'page' : undefined}>
+            {t('nav.calendar')}
+          </a>
+        </nav>
+      )}
+
+      {view === 'mine' ? (
+        <MyLaundry me={me} run={run} />
+      ) : (
+        <>
+          {!approved && <AccessCard me={me} run={run} onDone={loadMe} />}
+          {showCalendar && (
+            <Calendar
+              key={me.status}
+              me={me}
+              run={run}
+              jumpOnLoad={hash === '#/calendar/next'}
+              onJumped={clearJump}
+            />
+          )}
+          {me.isAdmin && <AdminPanel run={run} onChange={loadMe} />}
+        </>
+      )}
     </main>
   )
 }

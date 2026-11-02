@@ -44,7 +44,7 @@
   },
   "status": {
     "new": "Choose your apartment to request access.",
-    "pending": "Waiting for admin approval for {{apartment}}. You can look, but not book yet.",
+    "pending": "Waiting for admin approval for {{apartment}}. The calendar opens once you're approved.",
     "rejected": "Your request for {{apartment}} was rejected. You can request again.",
     "revoked": "Your access to {{apartment}} was revoked. You can request again."
   },
@@ -89,7 +89,8 @@
       "taken": "Taken",
       "maint": "Maintenance",
       "past": "Past"
-    }
+    },
+    "hoursLeft": "{{left}} / {{max}} h left"
   },
   "admin": {
     "title": "Residents",
@@ -127,5 +128,21 @@
     "unauthorized": "Your session has ended. Sign in again.",
     "not_found": "That booking no longer exists.",
     "invalid_apartment": "That apartment does not exist."
+  },
+  "nav": {
+    "label": "Views",
+    "mine": "My laundry",
+    "calendar": "Calendar"
+  },
+  "mine": {
+    "today": "Today",
+    "usedSoFar": "Includes {{count}} h already used this week.",
+    "lastMinute": "Slots starting within {{hours}} h ignore the limits, so you can still book one.",
+    "upcoming": "Your bookings",
+    "empty": "No bookings yet.",
+    "bookSlot": "Book a slot",
+    "now": "Now",
+    "cancelNotice": "An admin cancelled your booking on {{when}}.",
+    "dismiss": "Dismiss"
   }
 }
