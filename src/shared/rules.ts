@@ -69,11 +69,19 @@ const isLastMinute = (slot: Date, now: Date) =>
 export function limitError(existing: Date[], slot: Date, now: Date): RuleError | null {
   if (isLastMinute(slot, now)) return null
   const { date } = helsinki(slot)
-  const week = weekStart(date)
-  const days = existing.map((e) => helsinki(e).date)
-  if (days.filter((d) => d === date).length >= MAX_PER_DAY) return 'day_limit'
-  if (days.filter((d) => weekStart(d) === week).length >= MAX_PER_WEEK) return 'week_limit'
+  const left = hoursLeft(existing, date)
+  if (left.day === 0) return 'day_limit'
+  if (left.week === 0) return 'week_limit'
   return null
+}
+
+export function hoursLeft(existing: Date[], date: string) {
+  const days = existing.map((e) => helsinki(e).date)
+  const week = weekStart(date)
+  return {
+    day: Math.max(0, MAX_PER_DAY - days.filter((d) => d === date).length),
+    week: Math.max(0, MAX_PER_WEEK - days.filter((d) => weekStart(d) === week).length),
+  }
 }
 
 export const slotRun = (start: Date, hours: number) =>

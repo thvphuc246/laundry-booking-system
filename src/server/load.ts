@@ -13,7 +13,7 @@ import {
 } from '../shared/rules.js'
 import { BUILDING_ID, db } from './db.js'
 import { MOCK_DOMAIN, mock } from './mock.js'
-import { bookings, type User, users } from './schema.js'
+import { activeBooking, bookings, type User, users } from './schema.js'
 
 const BASE = process.env.LOAD_URL ?? 'http://localhost:3000'
 const SECRET = process.env.SESSION_SECRET
@@ -24,15 +24,21 @@ const SLOT_RACERS = 20
 if (!SECRET) throw new Error('SESSION_SECRET is not set')
 
 type Resident = User & { apartment_id: string; cookie: string }
-type Reply = { status: number; error?: string; slots?: { slot_start: string }[] }
+type Reply = { status: number; error?: string; slots?: { id: string; slot_start: string }[] }
 
 const timings = new Map<string, { ms: number[]; statuses: Record<number, number> }>()
 const checks: { name: string; ok: boolean; detail: string }[] = []
 
-const call = async (who: Resident, label: string, path: string, body?: unknown) => {
+const call = async (
+  who: Resident,
+  label: string,
+  path: string,
+  body?: unknown,
+  method?: string,
+) => {
   const started = performance.now()
   const res = await fetch(`${BASE}/api${path}`, {
-    method: body ? 'POST' : 'GET',
+    method: method ?? (body ? 'POST' : 'GET'),
     headers: {
       cookie: who.cookie,
       'content-type': 'application/json',
@@ -74,6 +80,7 @@ const bookedBetween = (from: Date, to: Date) =>
         eq(bookings.building_id, BUILDING_ID),
         gte(bookings.slot_start, from),
         lt(bookings.slot_start, to),
+        activeBooking,
       ),
     )
 
@@ -81,12 +88,14 @@ async function races(residents: Resident[]) {
   const day = addDays(helsinki(new Date()).date, BOOK_AHEAD_DAYS - 1)
   const at = (hour: number) => toUtc(day, hour)
   await db
-    .delete(bookings)
+    .update(bookings)
+    .set({ deleted_at: new Date() })
     .where(
       and(
         eq(bookings.building_id, BUILDING_ID),
         gte(bookings.slot_start, at(0)),
         lt(bookings.slot_start, toUtc(addDays(day, 1))),
+        activeBooking,
       ),
     )
   const week = weekStart(day)
@@ -111,6 +120,58 @@ async function races(residents: Resident[]) {
       slotRows.length === 1,
     `${slotRows.length} booking in DB; replies: ${outcome(slotReplies)}`,
   )
+
+  const cancelSlot = at(12)
+  const cancelCreate = await book(runnerA, 'cancel: create', cancelSlot)
+  const { slots = [] } = await call(runnerA, 'cancel: list', '/bookings')
+  const cancelBooking = slots.find((b) => new Date(b.slot_start).getTime() === cancelSlot.getTime())
+  const cancelReply = cancelBooking
+    ? await call(runnerA, 'cancel: delete', `/bookings/${cancelBooking.id}`, undefined, 'DELETE')
+    : { status: 404, error: 'not_found' }
+  const rebookReply = await book(runnerB, 'cancel: rebook', cancelSlot)
+  const cancelledRow = cancelBooking
+    ? await db
+        .select({
+          deleted_at: bookings.deleted_at,
+          deleted_by_user_id: bookings.deleted_by_user_id,
+        })
+        .from(bookings)
+        .where(eq(bookings.id, cancelBooking.id))
+    : []
+  const activeRows = await db
+    .select({ id: bookings.id })
+    .from(bookings)
+    .where(
+      and(
+        eq(bookings.building_id, BUILDING_ID),
+        eq(bookings.slot_start, cancelSlot),
+        activeBooking,
+      ),
+    )
+  check(
+    'cancel keeps the row and frees the slot',
+    cancelCreate.status === 200 &&
+      cancelReply.status === 200 &&
+      rebookReply.status === 200 &&
+      activeRows.length === 1 &&
+      cancelledRow.length === 1 &&
+      cancelledRow[0].deleted_at != null &&
+      cancelledRow[0].deleted_by_user_id === runnerA.id,
+    `${activeRows.length} active rows and cancelled row ${cancelledRow.length ? 'kept' : 'missing'}; replies: ${outcome(
+      [cancelCreate, cancelReply, rebookReply],
+    )}`,
+  )
+
+  await db
+    .update(bookings)
+    .set({ deleted_at: new Date() })
+    .where(
+      and(
+        eq(bookings.building_id, BUILDING_ID),
+        eq(bookings.slot_start, cancelSlot),
+        activeBooking,
+      ),
+    )
 
   await db.insert(bookings).values({
     building_id: BUILDING_ID,
@@ -168,11 +229,11 @@ const freeSlots = (booked: Set<number>, now: Date) => {
 
 async function visit(r: Resident) {
   await call(r, 'GET /me', '/me')
-  const { slots = [] } = await call(r, 'GET /bookings', '/bookings')
   if (r.status !== 'approved') {
     await call(r, 'GET /apartments', '/apartments')
     return
   }
+  const { slots = [] } = await call(r, 'GET /bookings', '/bookings')
   const free = freeSlots(new Set(slots.map((b) => new Date(b.slot_start).getTime())), new Date())
   const slot = free[Math.floor(Math.random() * free.length)]
   if (slot) await book(r, 'POST /bookings', slot)

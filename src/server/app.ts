@@ -1,5 +1,5 @@
 import { googleAuth } from '@hono/oauth-providers/google'
-import { and, asc, eq, gt, gte, lt, ne } from 'drizzle-orm'
+import { and, asc, eq, gt, gte, isNotNull, isNull, lt, ne } from 'drizzle-orm'
 import { Hono } from 'hono'
 import { deleteCookie, getCookie, setCookie } from 'hono/cookie'
 import { csrf } from 'hono/csrf'
@@ -20,7 +20,7 @@ import {
   weekStart,
 } from '../shared/rules.js'
 import { ADMINS, BUILDING_ID, db, isDuplicate } from './db.js'
-import { apartments, bookings, type User, users } from './schema.js'
+import { activeBooking, apartments, bookings, type User, users } from './schema.js'
 
 const SECRET = process.env.SESSION_SECRET
 if (!SECRET) throw new Error('SESSION_SECRET is not set')
@@ -153,6 +153,7 @@ app.post('/me/apartment', apartmentBody, async (c) => {
 
 app.get('/bookings', async (c) => {
   const u = c.get('user')
+  if (u.status !== 'approved' && !c.get('isAdmin')) return c.json({ error: 'not_approved' }, 403)
   const today = helsinki(new Date()).date
   const from = toUtc(weekStart(today))
   const to = toUtc(addDays(weekStart(addDays(today, BOOK_AHEAD_DAYS)), 7))
@@ -171,14 +172,14 @@ app.get('/bookings', async (c) => {
         eq(bookings.building_id, BUILDING_ID),
         gte(bookings.slot_start, from),
         lt(bookings.slot_start, to),
+        activeBooking,
       ),
     )
   const mine = residentApartmentId(u)
-  const showApartments = mine != null || c.get('isAdmin')
   return c.json(
     rows.map(({ apartment_id, apartment, ...r }) => ({
       ...r,
-      apartment: showApartments ? apartment : null,
+      apartment,
       mine: mine != null && apartment_id === mine,
     })),
   )
@@ -218,6 +219,7 @@ app.post('/bookings', slotBody, async (c) => {
             eq(bookings.apartment_id, aptId),
             gte(bookings.slot_start, toUtc(week)),
             lt(bookings.slot_start, toUtc(addDays(week, 7))),
+            activeBooking,
           ),
         )
       const e = runLimitError(
@@ -249,12 +251,52 @@ app.delete('/bookings/:id', async (c) => {
   const [b] = await db
     .select()
     .from(bookings)
-    .where(eq(bookings.id, c.req.param('id')))
+    .where(and(eq(bookings.id, c.req.param('id')), activeBooking))
   if (!b) return c.json({ error: 'not_found' }, 404)
   const mine = b.apartment_id != null && b.apartment_id === residentApartmentId(u)
   if (!canCancel(b.slot_start, mine, c.get('isAdmin'), new Date()))
     return c.json({ error: 'forbidden' }, 403)
-  await db.delete(bookings).where(eq(bookings.id, b.id))
+  await db
+    .update(bookings)
+    .set({ deleted_at: new Date(), deleted_by_user_id: u.id })
+    .where(and(eq(bookings.id, b.id), activeBooking))
+  return c.json({ ok: true })
+})
+
+app.get('/notices', async (c) => {
+  const u = c.get('user')
+  const from = toUtc(weekStart(helsinki(new Date()).date))
+  const rows = await db
+    .select({ id: bookings.id, slot_start: bookings.slot_start })
+    .from(bookings)
+    .where(
+      and(
+        eq(bookings.booked_by_user_id, u.id),
+        isNotNull(bookings.deleted_at),
+        ne(bookings.deleted_by_user_id, u.id),
+        isNull(bookings.notice_dismissed_at),
+        gte(bookings.slot_start, from),
+      ),
+    )
+    .orderBy(asc(bookings.slot_start))
+  return c.json(rows)
+})
+
+app.post('/notices/:id/dismiss', async (c) => {
+  const u = c.get('user')
+  const [result] = await db
+    .update(bookings)
+    .set({ notice_dismissed_at: new Date() })
+    .where(
+      and(
+        eq(bookings.id, c.req.param('id')),
+        eq(bookings.booked_by_user_id, u.id),
+        isNotNull(bookings.deleted_at),
+        isNull(bookings.notice_dismissed_at),
+      ),
+    )
+  if (((result as { affectedRows?: number }).affectedRows ?? 0) === 0)
+    return c.json({ error: 'not_found' }, 404)
   return c.json({ ok: true })
 })
 
@@ -323,8 +365,11 @@ app.post('/admin/users/:id/:action{approve|reject|revoke}', adminActionBody, asy
     await db.transaction(async (tx) => {
       await tx.update(users).set({ status: 'revoked' }).where(eq(users.id, t.id))
       await tx
-        .delete(bookings)
-        .where(and(eq(bookings.apartment_id, aptId), gt(bookings.slot_start, new Date())))
+        .update(bookings)
+        .set({ deleted_at: new Date(), deleted_by_user_id: c.get('user').id })
+        .where(
+          and(eq(bookings.apartment_id, aptId), gt(bookings.slot_start, new Date()), activeBooking),
+        )
     })
   }
   return c.json({ ok: true })

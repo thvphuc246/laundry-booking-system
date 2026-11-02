@@ -1,25 +1,9 @@
+import { mergeRuns } from './runs'
 import type { Booking } from './types'
 
 export const REMINDER_MINUTES = 15
-const HOUR = 3_600_000
 const stamp = (d: Date) => d.toISOString().replace(/[-:]|\.\d{3}/g, '')
 const text = (s: string) => s.replace(/[;,]/g, (c) => `\\${c}`).replace(/\n/g, '\\n')
-
-type Event = { id: string; start: Date; end: Date }
-
-function mergeAdjacent(bookings: Booking[]) {
-  const starts = bookings
-    .map((b) => ({ id: b.id, start: new Date(b.slot_start) }))
-    .sort((a, b) => a.start.getTime() - b.start.getTime())
-  const events: Event[] = []
-  for (const { id, start } of starts) {
-    const end = new Date(start.getTime() + HOUR)
-    const last = events.at(-1)
-    if (last?.end.getTime() === start.getTime()) last.end = end
-    else events.push({ id, start, end })
-  }
-  return events
-}
 
 export function bookingsToIcs(bookings: Booking[], summary: string, location: string, now: Date) {
   const lines = [
@@ -28,12 +12,12 @@ export function bookingsToIcs(bookings: Booking[], summary: string, location: st
     'PRODID:-//Laundry booking//EN',
     'CALSCALE:GREGORIAN',
     'METHOD:PUBLISH',
-    ...mergeAdjacent(bookings).flatMap((e) => [
+    ...mergeRuns(bookings).flatMap((run) => [
       'BEGIN:VEVENT',
-      `UID:${e.id}@laundry-booking`,
+      `UID:${run.bookings[0].id}@laundry-booking`,
       `DTSTAMP:${stamp(now)}`,
-      `DTSTART:${stamp(e.start)}`,
-      `DTEND:${stamp(e.end)}`,
+      `DTSTART:${stamp(run.start)}`,
+      `DTEND:${stamp(run.end)}`,
       `SUMMARY:${text(summary)}`,
       `LOCATION:${text(location)}`,
       'BEGIN:VALARM',
@@ -46,4 +30,20 @@ export function bookingsToIcs(bookings: Booking[], summary: string, location: st
     'END:VCALENDAR',
   ]
   return `${lines.join('\r\n')}\r\n`
+}
+
+export function downloadIcs(
+  bookings: Booking[],
+  summary: string,
+  location: string,
+  fileName: string,
+  now: Date,
+) {
+  const ics = bookingsToIcs(bookings, summary, location, now)
+  const url = URL.createObjectURL(new Blob([ics], { type: 'text/calendar' }))
+  const link = document.createElement('a')
+  link.href = url
+  link.download = fileName
+  link.click()
+  setTimeout(() => URL.revokeObjectURL(url))
 }

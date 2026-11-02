@@ -44,7 +44,7 @@
   },
   "status": {
     "new": "Valitse asuntosi pyytääksesi käyttöoikeutta.",
-    "pending": "Asunnon {{apartment}} käyttöoikeus odottaa ylläpitäjän hyväksyntää. Voit katsella, mutta et vielä varata.",
+    "pending": "Asunnon {{apartment}} käyttöoikeus odottaa ylläpitäjän hyväksyntää. Kalenteri avautuu, kun sinut on hyväksytty.",
     "rejected": "Pyyntösi asuntoon {{apartment}} hylättiin. Voit pyytää uudelleen.",
     "revoked": "Käyttöoikeutesi asuntoon {{apartment}} peruttiin. Voit pyytää uudelleen."
   },
@@ -89,7 +89,8 @@
       "taken": "Varattu",
       "maint": "Huolto",
       "past": "Mennyt"
-    }
+    },
+    "hoursLeft": "{{left}} / {{max}} h jäljellä"
   },
   "admin": {
     "title": "Asukkaat",
@@ -127,5 +128,21 @@
     "unauthorized": "Istuntosi on päättynyt. Kirjaudu uudelleen.",
     "not_found": "Varausta ei enää ole.",
     "invalid_apartment": "Asuntoa ei ole."
+  },
+  "nav": {
+    "label": "Näkymät",
+    "mine": "Oma pyykki",
+    "calendar": "Kalenteri"
+  },
+  "mine": {
+    "today": "Tänään",
+    "usedSoFar": "Sisältää tällä viikolla jo käytetyt {{count}} h.",
+    "lastMinute": "Alle {{hours}} tunnin päästä alkavat vuorot eivät kuulu rajoihin, joten voit yhä varata.",
+    "upcoming": "Varauksesi",
+    "empty": "Ei vielä varauksia.",
+    "bookSlot": "Varaa vuoro",
+    "now": "Nyt",
+    "cancelNotice": "Ylläpitäjä perui varauksesi {{when}}.",
+    "dismiss": "Kuittaa"
   }
 }

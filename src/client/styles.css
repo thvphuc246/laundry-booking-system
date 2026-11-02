@@ -264,6 +264,35 @@ button:disabled {
   box-shadow: 0 1px 2px rgb(0 0 0 / 0.12);
 }
 
+.tabs {
+  display: flex;
+  gap: 2px;
+  margin: 0;
+  padding: 3px;
+  border-radius: 12px;
+  border: 1px solid var(--line);
+  background: var(--sunken);
+  align-self: flex-start;
+}
+
+.tabs a {
+  display: flex;
+  align-items: center;
+  min-height: 40px;
+  padding: 0 12px;
+  border-radius: 9px;
+  color: var(--muted);
+  font-size: 14px;
+  font-weight: 500;
+  text-decoration: none;
+}
+
+.tabs a[aria-current="page"] {
+  background: var(--surface);
+  color: var(--ink);
+  box-shadow: 0 1px 2px rgb(0 0 0 / 0.12);
+}
+
 .alert,
 .notice {
   margin: 0;
@@ -494,6 +523,24 @@ button:disabled {
   gap: 24px;
 }
 
+.mine-view {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.mine-summary {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.hint,
+.empty {
+  margin: 0;
+  color: var(--muted);
+}
+
 .usage {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
@@ -630,6 +677,60 @@ td:last-child {
   gap: 8px;
 }
 
+.runs-card {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  padding: 24px;
+}
+
+.runs-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.runs {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.run {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 16px;
+  border-radius: 12px;
+  background: var(--sunken);
+}
+
+.run.past {
+  color: var(--muted);
+}
+
+.run-when {
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}
+
+.run-badge {
+  display: inline-flex;
+  margin-top: 6px;
+  padding: 3px 8px;
+  border-radius: 999px;
+  background: var(--accent-soft);
+  color: var(--accent-ink);
+  font-size: 13px;
+  font-weight: 600;
+}
+
 .grid-toolbar {
   display: flex;
   justify-content: space-between;
@@ -696,7 +797,6 @@ td:last-child {
 }
 
 .grid-card {
-  /* No left padding: the sticky time column must cover cells scrolled beneath it. */
   padding: 8px 8px 8px 0;
   overflow-x: auto;
 }
@@ -861,7 +961,6 @@ td:last-child {
   color: var(--maint-ink);
 }
 
-/* Past slots are hatched and faded so they read as closed, whatever their state. */
 .cell.past {
   border-color: transparent;
   background-image: repeating-linear-gradient(
@@ -1181,6 +1280,11 @@ td:last-child {
     justify-content: center;
   }
 
+  .tabs a {
+    min-width: 44px;
+    justify-content: center;
+  }
+
   .seg-label {
     position: absolute;
     width: 1px;
@@ -1212,5 +1316,11 @@ td:last-child {
 
   .jump {
     width: 100%;
+  }
+
+  .run,
+  .runs-head {
+    align-items: stretch;
+    flex-direction: column;
   }
 }
