@@ -20,7 +20,7 @@ import {
   weekStart,
 } from '../shared/rules.js'
 import { ADMINS, BUILDING_ID, db, isDuplicate } from './db.js'
-import { apartments, bookings, type User, users } from './schema.js'
+import { activeBooking, apartments, bookings, type User, users } from './schema.js'
 
 const SECRET = process.env.SESSION_SECRET
 if (!SECRET) throw new Error('SESSION_SECRET is not set')
@@ -171,6 +171,7 @@ app.get('/bookings', async (c) => {
         eq(bookings.building_id, BUILDING_ID),
         gte(bookings.slot_start, from),
         lt(bookings.slot_start, to),
+        activeBooking,
       ),
     )
   const mine = residentApartmentId(u)
@@ -218,6 +219,7 @@ app.post('/bookings', slotBody, async (c) => {
             eq(bookings.apartment_id, aptId),
             gte(bookings.slot_start, toUtc(week)),
             lt(bookings.slot_start, toUtc(addDays(week, 7))),
+            activeBooking,
           ),
         )
       const e = runLimitError(
@@ -249,12 +251,15 @@ app.delete('/bookings/:id', async (c) => {
   const [b] = await db
     .select()
     .from(bookings)
-    .where(eq(bookings.id, c.req.param('id')))
+    .where(and(eq(bookings.id, c.req.param('id')), activeBooking))
   if (!b) return c.json({ error: 'not_found' }, 404)
   const mine = b.apartment_id != null && b.apartment_id === residentApartmentId(u)
   if (!canCancel(b.slot_start, mine, c.get('isAdmin'), new Date()))
     return c.json({ error: 'forbidden' }, 403)
-  await db.delete(bookings).where(eq(bookings.id, b.id))
+  await db
+    .update(bookings)
+    .set({ deleted_at: new Date(), deleted_by_user_id: u.id })
+    .where(and(eq(bookings.id, b.id), activeBooking))
   return c.json({ ok: true })
 })
 
@@ -323,8 +328,11 @@ app.post('/admin/users/:id/:action{approve|reject|revoke}', adminActionBody, asy
     await db.transaction(async (tx) => {
       await tx.update(users).set({ status: 'revoked' }).where(eq(users.id, t.id))
       await tx
-        .delete(bookings)
-        .where(and(eq(bookings.apartment_id, aptId), gt(bookings.slot_start, new Date())))
+        .update(bookings)
+        .set({ deleted_at: new Date(), deleted_by_user_id: c.get('user').id })
+        .where(
+          and(eq(bookings.apartment_id, aptId), gt(bookings.slot_start, new Date()), activeBooking),
+        )
     })
   }
   return c.json({ ok: true })

@@ -1,4 +1,4 @@
-import { sql } from 'drizzle-orm'
+import { isNull, sql } from 'drizzle-orm'
 import {
   boolean,
   datetime,
@@ -62,12 +62,23 @@ export const bookings = mysqlTable(
       .references(() => users.id),
     slot_start: datetime().notNull(),
     is_maintenance: boolean().notNull().default(false),
+    deleted_at: timestamp(),
+    deleted_by_user_id: uuid().references(() => users.id),
+    notice_dismissed_at: timestamp(),
+    active_slot: datetime().generatedAlwaysAs(
+      sql`(case when deleted_at is null then slot_start end)`,
+      {
+        mode: 'virtual',
+      },
+    ),
     created_at: timestamp().notNull().defaultNow(),
   },
   (t) => [
-    uniqueIndex('bookings_building_slot').on(t.building_id, t.slot_start),
+    uniqueIndex('bookings_building_active_slot').on(t.building_id, t.active_slot),
     index('bookings_apartment_slot').on(t.apartment_id, t.slot_start),
   ],
 )
+
+export const activeBooking = isNull(bookings.deleted_at)
 
 export type User = typeof users.$inferSelect
