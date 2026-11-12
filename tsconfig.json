@@ -10,5 +10,5 @@
     "resolveJsonModule": true,
     "types": ["bun", "vite/client"]
   },
-  "include": ["src", "api", "*.ts"]
+  "include": ["src", "api", "e2e", "*.ts"]
 }

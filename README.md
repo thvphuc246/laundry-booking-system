@@ -35,6 +35,19 @@ bun run load                 # reseed, run the booking races, then 3 bursts of e
 
 `load` signs session cookies with `SESSION_SECRET`, so it must match the server's, and it reads `DATABASE_URL` to reseed and verify, so it must be the server's database. It targets `LOAD_URL` (default `http://localhost:3000`, the API from `bun dev`) and exits non-zero when a race check fails or any response is a 5xx.
 
+## End-to-end tests
+
+Playwright drives Chromium through the main flows against a throwaway `laundry_e2e` database on the local MySQL, with the clock fixed and the session cookie signed by the test setup. It does not read `.env` or touch the dev database, and it can run while `bun dev` is running.
+
+```sh
+docker compose up -d --wait
+bun x playwright install chromium   # once
+bun run test:e2e
+bun run test:e2e --ui               # watch and debug
+```
+
+Tests live in `e2e/*.e2e.ts`. Set `E2E_DATABASE_URL` to use another database; it must be on localhost or have `test` in its name.
+
 ### Staging
 
 1. Create a separate free TiDB Serverless cluster with a database named `laundry_test`.
