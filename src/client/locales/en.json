@@ -103,6 +103,24 @@
     "revoke": "Revoke",
     "confirmRevoke": "Revoke {{name}}? The apartment's future bookings will be cancelled."
   },
+  "activity": {
+    "title": "Activity",
+    "when": "When",
+    "who": "Who",
+    "what": "What",
+    "empty": "Nothing has happened yet.",
+    "more": "Show older",
+    "events": {
+      "apartment_requested": "Requested apartment {{apartment}}",
+      "resident_approved": "Approved {{subject}} for {{apartment}}",
+      "resident_rejected": "Rejected {{subject}}'s request for {{apartment}}",
+      "resident_revoked": "Revoked {{subject}}'s access to {{apartment}}",
+      "booking_created": "Booked {{when}} for {{apartment}}",
+      "booking_cancelled": "Cancelled the {{apartment}} booking on {{when}}",
+      "maintenance_created": "Blocked {{when}} for maintenance",
+      "maintenance_cancelled": "Removed the maintenance block on {{when}}"
+    }
+  },
   "states": {
     "new": "new",
     "pending": "pending",

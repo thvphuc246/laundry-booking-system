@@ -1,4 +1,5 @@
-import { TZ, toUtc } from '../shared/rules'
+import { helsinki, TZ, toUtc } from '../shared/rules'
+import type { ActivityEvent } from './types'
 
 const weekdays = new Map<string, Intl.DateTimeFormat>()
 
@@ -26,3 +27,11 @@ export function relativeTime(target: Date, now: Date, language: string) {
   if (Math.abs(hours) < 48) return format.format(hours, 'hour')
   return format.format(Math.round(hours / 24), 'day')
 }
+
+export function dateTimeLabel(d: Date, language: string) {
+  const h = helsinki(d)
+  return `${dayLabel(h.date, language)} ${pad(h.hour)}:${pad(h.minute)}`
+}
+
+export const activityKey = (e: Pick<ActivityEvent, 'type' | 'apartment'>) =>
+  `activity.events.${e.apartment == null && e.type.startsWith('booking_') ? e.type.replace('booking', 'maintenance') : e.type}`
