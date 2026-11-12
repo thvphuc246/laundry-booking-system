@@ -1,5 +1,6 @@
 import { googleAuth } from '@hono/oauth-providers/google'
-import { and, asc, eq, gt, gte, isNotNull, isNull, lt, ne } from 'drizzle-orm'
+import { and, asc, desc, eq, gt, gte, isNotNull, isNull, lt, ne } from 'drizzle-orm'
+import { alias } from 'drizzle-orm/mysql-core'
 import { Hono } from 'hono'
 import { deleteCookie, getCookie, setCookie } from 'hono/cookie'
 import { csrf } from 'hono/csrf'
@@ -7,6 +8,7 @@ import { createMiddleware } from 'hono/factory'
 import { HTTPException } from 'hono/http-exception'
 import { sign, verify } from 'hono/jwt'
 import { validator } from 'hono/validator'
+import { EVENTS_PAGE } from '../shared/events.js'
 import {
   addDays,
   BOOK_AHEAD_DAYS,
@@ -20,7 +22,16 @@ import {
   weekStart,
 } from '../shared/rules.js'
 import { ADMINS, BUILDING_ID, db, isDuplicate } from './db.js'
-import { activeBooking, apartments, bookings, type User, users } from './schema.js'
+import { bookingEvent, recordEvents } from './events.js'
+import {
+  activeBooking,
+  apartments,
+  bookings,
+  events,
+  type NewEvent,
+  type User,
+  users,
+} from './schema.js'
 
 const SECRET = process.env.SESSION_SECRET
 if (!SECRET) throw new Error('SESSION_SECRET is not set')
@@ -147,7 +158,20 @@ app.post('/me/apartment', apartmentBody, async (c) => {
     .from(users)
     .where(eq(users.approved_apartment_id, apt.id))
   if (holder) return c.json({ error: 'apartment_taken' }, 409)
-  await db.update(users).set({ apartment_id: apt.id, status: 'pending' }).where(eq(users.id, u.id))
+  await db.transaction(async (tx) => {
+    await tx
+      .update(users)
+      .set({ apartment_id: apt.id, status: 'pending' })
+      .where(eq(users.id, u.id))
+    await recordEvents(tx, [
+      {
+        type: 'apartment_requested',
+        actor_user_id: u.id,
+        subject_user_id: u.id,
+        apartment_id: apt.id,
+      },
+    ])
+  })
   return c.json({ ok: true })
 })
 
@@ -195,14 +219,17 @@ app.post('/bookings', slotBody, async (c) => {
   try {
     if (maintenance) {
       if (!c.get('isAdmin')) return c.json({ error: 'forbidden' }, 403)
-      await db.insert(bookings).values(
-        slots.map((slot_start) => ({
-          building_id: BUILDING_ID,
-          booked_by_user_id: u.id,
-          slot_start,
-          is_maintenance: true,
-        })),
-      )
+      const rows = slots.map((slot_start) => ({
+        id: crypto.randomUUID(),
+        building_id: BUILDING_ID,
+        booked_by_user_id: u.id,
+        slot_start,
+        is_maintenance: true,
+      }))
+      await db.transaction(async (tx) => {
+        await tx.insert(bookings).values(rows)
+        await recordEvents(tx, rows.map(bookingEvent('booking_created', u.id)))
+      })
       return c.json({ ok: true })
     }
     const aptId = residentApartmentId(u)
@@ -228,14 +255,15 @@ app.post('/bookings', slotBody, async (c) => {
         now,
       )
       if (e) return e
-      await tx.insert(bookings).values(
-        slots.map((slot_start) => ({
-          building_id: apt.building_id,
-          apartment_id: aptId,
-          booked_by_user_id: u.id,
-          slot_start,
-        })),
-      )
+      const rows = slots.map((slot_start) => ({
+        id: crypto.randomUUID(),
+        building_id: apt.building_id,
+        apartment_id: aptId,
+        booked_by_user_id: u.id,
+        slot_start,
+      }))
+      await tx.insert(bookings).values(rows)
+      await recordEvents(tx, rows.map(bookingEvent('booking_created', u.id)))
       return null
     })
     if (limit) return c.json({ error: limit }, 409)
@@ -256,10 +284,14 @@ app.delete('/bookings/:id', async (c) => {
   const mine = b.apartment_id != null && b.apartment_id === residentApartmentId(u)
   if (!canCancel(b.slot_start, mine, c.get('isAdmin'), new Date()))
     return c.json({ error: 'forbidden' }, 403)
-  await db
-    .update(bookings)
-    .set({ deleted_at: new Date(), deleted_by_user_id: u.id })
-    .where(and(eq(bookings.id, b.id), activeBooking))
+  await db.transaction(async (tx) => {
+    const [result] = await tx
+      .update(bookings)
+      .set({ deleted_at: new Date(), deleted_by_user_id: u.id })
+      .where(and(eq(bookings.id, b.id), activeBooking))
+    if (result.affectedRows === 1)
+      await recordEvents(tx, [bookingEvent('booking_cancelled', u.id)(b)])
+  })
   return c.json({ ok: true })
 })
 
@@ -315,6 +347,30 @@ app.get('/admin/users', async (c) => {
   return c.json(rows)
 })
 
+app.get('/admin/events', async (c) => {
+  const actor = alias(users, 'actor')
+  const subject = alias(users, 'subject')
+  const offset = Math.max(0, Number(c.req.query('offset')) || 0)
+  const rows = await db
+    .select({
+      id: events.id,
+      type: events.type,
+      created_at: events.created_at,
+      slot_start: events.slot_start,
+      actor: actor.name,
+      subject: subject.name,
+      apartment: apartments.code,
+    })
+    .from(events)
+    .innerJoin(actor, eq(actor.id, events.actor_user_id))
+    .leftJoin(subject, eq(subject.id, events.subject_user_id))
+    .leftJoin(apartments, eq(apartments.id, events.apartment_id))
+    .orderBy(desc(events.created_at), desc(events.slot_start), desc(events.id))
+    .limit(EVENTS_PAGE)
+    .offset(offset)
+  return c.json(rows)
+})
+
 app.post('/admin/users/:id/:action{approve|reject|revoke}', adminActionBody, async (c) => {
   const [t] = await db
     .select()
@@ -342,12 +398,35 @@ app.post('/admin/users/:id/:action{approve|reject|revoke}', adminActionBody, asy
             and(eq(users.id, t.id), eq(users.status, 'pending'), eq(users.apartment_id, aptId)),
           )
         if (result.affectedRows === 0) return false
+        const adminId = c.get('user').id
+        const others = await tx
+          .select({ id: users.id })
+          .from(users)
+          .where(
+            and(eq(users.apartment_id, aptId), eq(users.status, 'pending'), ne(users.id, t.id)),
+          )
+          .for('update')
         await tx
           .update(users)
           .set({ status: 'rejected' })
           .where(
             and(eq(users.apartment_id, aptId), eq(users.status, 'pending'), ne(users.id, t.id)),
           )
+        const rows: NewEvent[] = [
+          {
+            type: 'resident_approved',
+            actor_user_id: adminId,
+            subject_user_id: t.id,
+            apartment_id: aptId,
+          },
+          ...others.map((o) => ({
+            type: 'resident_rejected' as const,
+            actor_user_id: adminId,
+            subject_user_id: o.id,
+            apartment_id: aptId,
+          })),
+        ]
+        await recordEvents(tx, rows)
         return true
       })
       if (!approved) return c.json({ error: 'apartment_changed' }, 409)
@@ -357,19 +436,56 @@ app.post('/admin/users/:id/:action{approve|reject|revoke}', adminActionBody, asy
     }
   } else if (action === 'reject') {
     if (t.status !== 'pending') return c.json({ error: 'not_pending' }, 409)
-    await db.update(users).set({ status: 'rejected' }).where(eq(users.id, t.id))
+    const adminId = c.get('user').id
+    await db.transaction(async (tx) => {
+      const [result] = await tx
+        .update(users)
+        .set({ status: 'rejected' })
+        .where(and(eq(users.id, t.id), eq(users.status, 'pending')))
+      if (result.affectedRows === 1)
+        await recordEvents(tx, [
+          {
+            type: 'resident_rejected',
+            actor_user_id: adminId,
+            subject_user_id: t.id,
+            apartment_id: t.apartment_id,
+          },
+        ])
+    })
   } else {
     if (t.status !== 'approved' || t.apartment_id == null)
       return c.json({ error: 'not_approved' }, 409)
     const aptId = t.apartment_id
+    const adminId = c.get('user').id
     await db.transaction(async (tx) => {
-      await tx.update(users).set({ status: 'revoked' }).where(eq(users.id, t.id))
-      await tx
-        .update(bookings)
-        .set({ deleted_at: new Date(), deleted_by_user_id: c.get('user').id })
+      const future = await tx
+        .select({
+          id: bookings.id,
+          apartment_id: bookings.apartment_id,
+          booked_by_user_id: bookings.booked_by_user_id,
+          slot_start: bookings.slot_start,
+        })
+        .from(bookings)
         .where(
           and(eq(bookings.apartment_id, aptId), gt(bookings.slot_start, new Date()), activeBooking),
         )
+        .for('update')
+      await tx.update(users).set({ status: 'revoked' }).where(eq(users.id, t.id))
+      await tx
+        .update(bookings)
+        .set({ deleted_at: new Date(), deleted_by_user_id: adminId })
+        .where(
+          and(eq(bookings.apartment_id, aptId), gt(bookings.slot_start, new Date()), activeBooking),
+        )
+      await recordEvents(tx, [
+        {
+          type: 'resident_revoked',
+          actor_user_id: adminId,
+          subject_user_id: t.id,
+          apartment_id: aptId,
+        },
+        ...future.map(bookingEvent('booking_cancelled', adminId)),
+      ])
     })
   }
   return c.json({ ok: true })

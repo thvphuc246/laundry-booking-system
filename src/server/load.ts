@@ -13,7 +13,7 @@ import {
 } from '../shared/rules.js'
 import { BUILDING_ID, db } from './db.js'
 import { MOCK_DOMAIN, mock } from './mock.js'
-import { activeBooking, bookings, type User, users } from './schema.js'
+import { activeBooking, bookings, events, type User, users } from './schema.js'
 
 const BASE = process.env.LOAD_URL ?? 'http://localhost:3000'
 const SECRET = process.env.SESSION_SECRET
@@ -160,6 +160,21 @@ async function races(residents: Resident[]) {
     `${activeRows.length} active rows and cancelled row ${cancelledRow.length ? 'kept' : 'missing'}; replies: ${outcome(
       [cancelCreate, cancelReply, rebookReply],
     )}`,
+  )
+
+  const cancelEvents = cancelBooking
+    ? await db
+        .select({ type: events.type, actor_user_id: events.actor_user_id })
+        .from(events)
+        .where(eq(events.booking_id, cancelBooking.id))
+    : []
+  check(
+    'events record the booking and its cancellation',
+    cancelEvents.length === 2 &&
+      cancelEvents.some((e) => e.type === 'booking_created') &&
+      cancelEvents.some((e) => e.type === 'booking_cancelled') &&
+      cancelEvents.every((e) => e.actor_user_id === runnerA.id),
+    cancelEvents.length ? `${cancelEvents.map((e) => e.type).join(', ')}` : 'no events recorded',
   )
 
   await db

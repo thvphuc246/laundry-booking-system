@@ -9,6 +9,7 @@ import {
   uniqueIndex,
   varchar,
 } from 'drizzle-orm/mysql-core'
+import { EVENT_TYPES } from '../shared/events.js'
 
 const uuid = () => varchar({ length: 36 })
 const id = () =>
@@ -80,5 +81,24 @@ export const bookings = mysqlTable(
 )
 
 export const activeBooking = isNull(bookings.deleted_at)
+
+export const events = mysqlTable(
+  'Events',
+  {
+    id: id(),
+    type: mysqlEnum(EVENT_TYPES).notNull(),
+    actor_user_id: uuid()
+      .notNull()
+      .references(() => users.id),
+    subject_user_id: uuid().references(() => users.id),
+    apartment_id: uuid().references(() => apartments.id),
+    booking_id: uuid().references(() => bookings.id),
+    slot_start: datetime(),
+    created_at: timestamp().notNull().defaultNow(),
+  },
+  (t) => [index('events_created_at').on(t.created_at)],
+)
+
+export type NewEvent = typeof events.$inferInsert
 
 export type User = typeof users.$inferSelect

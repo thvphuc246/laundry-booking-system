@@ -1,3 +1,5 @@
+import type { EventType } from '../shared/events'
+
 export type Status = 'new' | 'pending' | 'approved' | 'rejected' | 'revoked'
 export type Me = {
   id: string
@@ -26,3 +28,12 @@ export type AdminUser = {
 }
 export type ThemeChoice = 'light' | 'dark' | 'system'
 export type Run = (fn: () => Promise<unknown>, after?: () => unknown) => Promise<void>
+export type ActivityEvent = {
+  id: string
+  type: EventType
+  created_at: string
+  slot_start: string | null
+  actor: string
+  subject: string | null
+  apartment: string | null
+}

@@ -32,3 +32,7 @@ test('HTTP errors from middleware keep their status instead of becoming 500', as
   const res = await app.request('/api/auth/google?code=x&state=forged')
   expect(res.status).toBe(401)
 })
+
+test('the activity log needs an admin session', async () => {
+  expect((await app.request('/api/admin/events')).status).toBe(401)
+})

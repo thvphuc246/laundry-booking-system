@@ -103,6 +103,24 @@
     "revoke": "Återkalla",
     "confirmRevoke": "Återkalla åtkomsten för {{name}}? Lägenhetens kommande bokningar avbokas."
   },
+  "activity": {
+    "title": "Aktivitet",
+    "when": "När",
+    "who": "Vem",
+    "what": "Vad",
+    "empty": "Inget har hänt än.",
+    "more": "Visa äldre",
+    "events": {
+      "apartment_requested": "Begärde åtkomst till lägenhet {{apartment}}",
+      "resident_approved": "Godkände {{subject}} för {{apartment}}",
+      "resident_rejected": "Avslog begäran från {{subject}} om {{apartment}}",
+      "resident_revoked": "Återkallade åtkomsten till {{apartment}} för {{subject}}",
+      "booking_created": "Bokade {{when}} för {{apartment}}",
+      "booking_cancelled": "Avbokade bokningen {{when}} för {{apartment}}",
+      "maintenance_created": "Spärrade {{when}} för underhåll",
+      "maintenance_cancelled": "Tog bort underhållsspärren {{when}}"
+    }
+  },
   "states": {
     "new": "ny",
     "pending": "väntar",

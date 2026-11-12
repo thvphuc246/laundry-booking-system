@@ -1,6 +1,6 @@
 import { notInArray } from 'drizzle-orm'
 import { ADMINS, db } from './db.js'
-import { bookings, users } from './schema.js'
+import { bookings, events, users } from './schema.js'
 
 export function assertTestDb(url = process.env.DATABASE_URL ?? '') {
   const { hostname, pathname } = new URL(url)
@@ -12,6 +12,7 @@ export function assertTestDb(url = process.env.DATABASE_URL ?? '') {
 
 export async function wipe() {
   assertTestDb()
+  await db.delete(events)
   await db.delete(bookings)
   await db.delete(users).where(ADMINS.length ? notInArray(users.email, ADMINS) : undefined)
 }

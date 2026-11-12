@@ -2,6 +2,7 @@ import { useCallback, useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { ApiClient, ApiError } from './api'
 import { AccessCard } from './components/AccessCard'
+import { ActivityLog } from './components/ActivityLog'
 import { AdminPanel } from './components/AdminPanel'
 import { Calendar } from './components/Calendar'
 import { InfoIcon, LogoIcon } from './components/icons'
@@ -128,6 +129,7 @@ export function App() {
             />
           )}
           {me.isAdmin && <AdminPanel run={run} onChange={loadMe} />}
+          {me.isAdmin && <ActivityLog run={run} />}
         </>
       )}
     </main>

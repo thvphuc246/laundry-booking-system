@@ -103,6 +103,24 @@
     "revoke": "Peru oikeus",
     "confirmRevoke": "Perutaanko käyttäjän {{name}} oikeus? Asunnon tulevat varaukset perutaan."
   },
+  "activity": {
+    "title": "Tapahtumat",
+    "when": "Milloin",
+    "who": "Kuka",
+    "what": "Mitä",
+    "empty": "Ei vielä tapahtumia.",
+    "more": "Näytä vanhempia",
+    "events": {
+      "apartment_requested": "Pyysi käyttöoikeutta asuntoon {{apartment}}",
+      "resident_approved": "Hyväksyi asukkaan {{subject}} asuntoon {{apartment}}",
+      "resident_rejected": "Hylkäsi asukkaan {{subject}} pyynnön asuntoon {{apartment}}",
+      "resident_revoked": "Poisti asukkaan {{subject}} käyttöoikeuden asuntoon {{apartment}}",
+      "booking_created": "Varasi vuoron {{when}} asunnolle {{apartment}}",
+      "booking_cancelled": "Perui asunnon {{apartment}} varauksen {{when}}",
+      "maintenance_created": "Varasi huoltoa varten {{when}}",
+      "maintenance_cancelled": "Perui huoltovarauksen {{when}}"
+    }
+  },
   "states": {
     "new": "uusi",
     "pending": "odottaa",

@@ -620,6 +620,20 @@ button:disabled {
   gap: 16px;
 }
 
+.activity {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.activity summary {
+  cursor: pointer;
+}
+
+.activity-title {
+  display: inline;
+}
+
 .table-wrap {
   overflow-x: auto;
 }
