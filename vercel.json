@@ -2,6 +2,7 @@
   "buildCommand": "vite build",
   "outputDirectory": "dist",
   "regions": ["fra1"],
+  "crons": [{ "path": "/api/cron/reminders", "schedule": "0 16 * * *" }],
   "headers": [
     {
       "source": "/(.*)",

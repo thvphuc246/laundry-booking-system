@@ -1,4 +1,6 @@
 import type { EventType } from '../shared/events'
+import type { SlotRun } from '../shared/runs'
+import type { Language } from './i18n'
 
 export type Status = 'new' | 'pending' | 'approved' | 'rejected' | 'revoked'
 export type Me = {
@@ -8,6 +10,7 @@ export type Me = {
   status: Status
   apartment: string | null
   isAdmin: boolean
+  language: Language
 }
 export type Booking = {
   id: string
@@ -17,7 +20,7 @@ export type Booking = {
   mine: boolean
 }
 export type Notice = { id: string; slot_start: string }
-export type BookingRun = { bookings: Booking[]; start: Date; end: Date }
+export type BookingRun = SlotRun<Booking>
 export type Apartment = { id: string; code: string; taken: boolean }
 export type AdminUser = {
   id: string

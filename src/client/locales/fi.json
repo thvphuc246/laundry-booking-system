@@ -3,6 +3,12 @@
   "confirm": {
     "dismiss": "Takaisin"
   },
+  "email": {
+    "subject": "Pesutupamuistutus",
+    "greeting": "Hei {{name}},",
+    "intro": "Pesutupavarauksesi asunnolle {{apartment}}:",
+    "cancel": "Etkö pääsekään? Peru varaus sovelluksessa, jotta joku muu voi käyttää vuoron: {{url}}"
+  },
   "title": "Pesutupa",
   "address": "Forstmestarinpiha 2, 02610 Espoo",
   "loading": "Ladataan…",

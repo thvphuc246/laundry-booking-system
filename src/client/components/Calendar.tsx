@@ -1,6 +1,13 @@
 import { type KeyboardEvent, useCallback, useEffect, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import {
+  dayMonthLabel,
+  dayLabel as formatDayLabel,
+  pad,
+  timeLabel,
+  weekdayFormat,
+} from '../../shared/format'
+import {
   addDays,
   BOOK_AHEAD_DAYS,
   CLOSE_HOUR,
@@ -18,7 +25,6 @@ import {
   weekStart,
 } from '../../shared/rules'
 import { ApiClient } from '../api'
-import { dayMonthLabel, dayLabel as formatDayLabel, pad, timeLabel, weekdayFormat } from '../format'
 import type { Booking, Me, Run } from '../types'
 import { useNow } from '../useNow'
 import { useConfirm } from './ConfirmDialog'

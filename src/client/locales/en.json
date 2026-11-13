@@ -3,6 +3,12 @@
   "confirm": {
     "dismiss": "Go back"
   },
+  "email": {
+    "subject": "Laundry room reminder",
+    "greeting": "Hi {{name}},",
+    "intro": "Your laundry room booking for apartment {{apartment}}:",
+    "cancel": "Can't make it? Cancel in the app so someone else can use the slot: {{url}}"
+  },
   "title": "Laundry room",
   "address": "Forstmestarinpiha 2, 02610 Espoo",
   "loading": "Loading…",

@@ -35,6 +35,7 @@ export const apartments = mysqlTable(
 )
 
 export const USER_STATUSES = ['new', 'pending', 'approved', 'rejected', 'revoked'] as const
+export const USER_LANGUAGES = ['en', 'fi', 'sv'] as const
 
 export const users = mysqlTable('Users', {
   id: id(),
@@ -42,6 +43,7 @@ export const users = mysqlTable('Users', {
   name: varchar({ length: 255 }).notNull(),
   apartment_id: uuid().references(() => apartments.id),
   status: mysqlEnum(USER_STATUSES).notNull().default('new'),
+  language: mysqlEnum(USER_LANGUAGES).notNull().default('en'),
   approved_apartment_id: uuid()
     .generatedAlwaysAs(sql`(case when status = 'approved' then apartment_id end)`, {
       mode: 'stored',
@@ -66,6 +68,7 @@ export const bookings = mysqlTable(
     deleted_at: timestamp(),
     deleted_by_user_id: uuid().references(() => users.id),
     notice_dismissed_at: timestamp(),
+    reminded_at: timestamp(),
     active_slot: datetime().generatedAlwaysAs(
       sql`(case when deleted_at is null then slot_start end)`,
       {

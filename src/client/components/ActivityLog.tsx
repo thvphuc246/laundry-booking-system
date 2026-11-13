@@ -1,9 +1,9 @@
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { EVENTS_PAGE } from '../../shared/events'
+import { activityKey, dateTimeLabel, dayLabel, timeLabel } from '../../shared/format'
 import { helsinki } from '../../shared/rules'
 import { ApiClient } from '../api'
-import { activityKey, dateTimeLabel, dayLabel, timeLabel } from '../format'
 import type { ActivityEvent, Run } from '../types'
 
 const api = ApiClient.getInstance()

@@ -1,5 +1,5 @@
-import { helsinki, TZ, toUtc } from '../shared/rules'
-import type { ActivityEvent } from './types'
+import type { EventType } from './events.js'
+import { helsinki, TZ, toUtc } from './rules.js'
 
 const weekdays = new Map<string, Intl.DateTimeFormat>()
 
@@ -33,5 +33,5 @@ export function dateTimeLabel(d: Date, language: string) {
   return `${dayLabel(h.date, language)} ${pad(h.hour)}:${pad(h.minute)}`
 }
 
-export const activityKey = (e: Pick<ActivityEvent, 'type' | 'apartment'>) =>
+export const activityKey = (e: { type: EventType; apartment: string | null }) =>
   `activity.events.${e.apartment == null && e.type.startsWith('booking_') ? e.type.replace('booking', 'maintenance') : e.type}`

@@ -15,7 +15,7 @@ import type { Me } from './types'
 const api = ApiClient.getInstance()
 
 export function App() {
-  const { t } = useTranslation()
+  const { t, i18n } = useTranslation()
   const [me, setMe] = useState<Me | null | undefined>(undefined)
   const [error, setError] = useState<string | null>(null)
   const [hash, setHash] = useState(() => location.hash)
@@ -24,6 +24,15 @@ export function App() {
   useEffect(() => {
     loadMe()
   }, [loadMe])
+
+  useEffect(() => {
+    const language = i18n.resolvedLanguage
+    if (!me || !language || me.language === language) return
+    api.request('/me/language', 'POST', { language }).then(
+      () => setMe({ ...me, language: language as Me['language'] }),
+      () => undefined,
+    )
+  }, [me, i18n.resolvedLanguage])
 
   useEffect(() => {
     const onHashChange = () => setHash(location.hash)

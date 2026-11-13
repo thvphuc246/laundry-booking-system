@@ -98,3 +98,13 @@ export function runLimitError(existing: Date[], run: Date[], now: Date): RuleErr
 export function canCancel(slot: Date, mine: boolean, isAdmin: boolean, now: Date) {
   return slot > now && (mine || isAdmin)
 }
+
+export const REMINDER_HOURS = 24
+
+export const remindsNow = (slot: Date, now: Date) =>
+  slot.getTime() - now.getTime() <= REMINDER_HOURS * 3_600_000
+
+export function digestWindow(now: Date) {
+  const day = addDays(helsinki(now).date, 1)
+  return { from: toUtc(day), to: toUtc(addDays(day, 1)) }
+}
