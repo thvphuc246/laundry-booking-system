@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { useTranslation } from 'react-i18next'
+import { dayLabel, relativeTime, timeLabel } from '../../shared/format'
 import {
   canCancel,
   helsinki,
@@ -9,10 +10,9 @@ import {
   MAX_PER_WEEK,
   weekStart,
 } from '../../shared/rules'
+import { mergeRuns } from '../../shared/runs'
 import { ApiClient } from '../api'
-import { dayLabel, relativeTime, timeLabel } from '../format'
 import { downloadIcs } from '../ics'
-import { mergeRuns } from '../runs'
 import type { Booking, Me, Notice, Run } from '../types'
 import { useNow } from '../useNow'
 import { useConfirm } from './ConfirmDialog'

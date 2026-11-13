@@ -1,6 +1,6 @@
 import { expect, test } from 'bun:test'
+import type { Booking } from '../client/types'
 import { mergeRuns } from './runs'
-import type { Booking } from './types'
 
 const NOW = new Date('2026-09-21T10:00:00Z')
 const HOUR = 3_600_000

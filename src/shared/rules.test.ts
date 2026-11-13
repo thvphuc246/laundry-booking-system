@@ -1,9 +1,11 @@
 import { expect, test } from 'bun:test'
 import {
   canCancel,
+  digestWindow,
   helsinki,
   hoursLeft,
   limitError,
+  remindsNow,
   runLimitError,
   slotError,
   slotRun,
@@ -96,4 +98,20 @@ test('slotRun lists consecutive hours; runLimitError counts earlier hours of the
   expect(runLimitError([hour(23)], run, NOW)).toBe('day_limit')
   expect(runLimitError([hour(23)], slotRun(start, 1), NOW)).toBeNull()
   expect(runLimitError([hour(-2), hour(-1)], slotRun(hour(1), 2), NOW)).toBeNull()
+})
+
+test('remindsNow allows slots up to 24 h ahead', () => {
+  const hour = (n: number) => new Date(NOW.getTime() + n * 3_600_000)
+  expect(remindsNow(hour(24), NOW)).toBe(true)
+  expect(remindsNow(new Date(hour(24).getTime() + 1), NOW)).toBe(false)
+})
+
+test('digestWindow covers tomorrow in Helsinki, across the autumn DST change', () => {
+  expect(digestWindow(NOW)).toEqual({ from: toUtc('2026-09-21'), to: toUtc('2026-09-22') })
+  const autumn = new Date(NOW.getTime() + 34 * 86_400_000)
+  expect(helsinki(autumn).date).toBe('2026-10-24')
+  const window = digestWindow(autumn)
+  expect(window.from.toISOString()).toBe(toUtc('2026-10-25').toISOString())
+  expect(window.to.toISOString()).toBe(toUtc('2026-10-26').toISOString())
+  expect(window.to.getTime() - window.from.getTime()).toBe(25 * 3_600_000)
 })

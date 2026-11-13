@@ -1,4 +1,4 @@
-import { mergeRuns } from './runs'
+import { mergeRuns } from '../shared/runs'
 import type { Booking } from './types'
 
 export const REMINDER_MINUTES = 15

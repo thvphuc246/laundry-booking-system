@@ -3,6 +3,12 @@
   "confirm": {
     "dismiss": "Tillbaka"
   },
+  "email": {
+    "subject": "Påminnelse om tvättstugan",
+    "greeting": "Hej {{name}},",
+    "intro": "Din bokning av tvättstugan för lägenhet {{apartment}}:",
+    "cancel": "Kan du inte komma? Avboka i appen så att någon annan kan använda tiden: {{url}}"
+  },
   "title": "Tvättstuga",
   "address": "Forstmestarinpiha 2, 02610 Espoo",
   "loading": "Laddar…",

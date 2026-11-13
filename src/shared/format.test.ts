@@ -1,9 +1,9 @@
 import { expect, test } from 'bun:test'
-import { EVENT_TYPES } from '../shared/events'
+import en from '../client/locales/en.json'
+import fi from '../client/locales/fi.json'
+import sv from '../client/locales/sv.json'
+import { EVENT_TYPES } from './events'
 import { activityKey, dateTimeLabel, relativeTime } from './format'
-import en from './locales/en.json'
-import fi from './locales/fi.json'
-import sv from './locales/sv.json'
 
 const NOW = new Date('2026-09-21T10:00:00Z')
 const HOUR = 3_600_000

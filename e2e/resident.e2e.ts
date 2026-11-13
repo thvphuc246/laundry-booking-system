@@ -49,3 +49,11 @@ test('shows an error when the booking request fails', async ({ page }) => {
   await confirm(page, 'Book')
   await expect(page.getByRole('alert')).toHaveText('Something went wrong. Try again.')
 })
+
+test('saves the chosen language for emails', async ({ page }) => {
+  await page.goto('/')
+  const saved = page.waitForResponse((r) => r.url().endsWith('/api/me/language'))
+  await page.getByRole('button', { name: 'suomi' }).click()
+  await saved
+  expect((await (await page.request.get('/api/me')).json()).language).toBe('fi')
+})

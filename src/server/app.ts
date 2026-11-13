@@ -1,7 +1,8 @@
 import { googleAuth } from '@hono/oauth-providers/google'
-import { and, asc, desc, eq, gt, gte, isNotNull, isNull, lt, ne } from 'drizzle-orm'
+import { and, asc, desc, eq, gt, gte, inArray, isNotNull, isNull, lt, ne } from 'drizzle-orm'
 import { alias } from 'drizzle-orm/mysql-core'
 import { Hono } from 'hono'
+import { bearerAuth } from 'hono/bearer-auth'
 import { deleteCookie, getCookie, setCookie } from 'hono/cookie'
 import { csrf } from 'hono/csrf'
 import { createMiddleware } from 'hono/factory'
@@ -13,8 +14,10 @@ import {
   addDays,
   BOOK_AHEAD_DAYS,
   canCancel,
+  digestWindow,
   helsinki,
   MAX_RUN_HOURS,
+  remindsNow,
   runLimitError,
   slotError,
   slotRun,
@@ -23,12 +26,14 @@ import {
 } from '../shared/rules.js'
 import { ADMINS, BUILDING_ID, db, isDuplicate } from './db.js'
 import { bookingEvent, recordEvents } from './events.js'
+import { remindBookings } from './reminders.js'
 import {
   activeBooking,
   apartments,
   bookings,
   events,
   type NewEvent,
+  USER_LANGUAGES,
   type User,
   users,
 } from './schema.js'
@@ -104,6 +109,24 @@ app.post('/auth/logout', (c) => {
   return c.json({ ok: true })
 })
 
+app.get(
+  '/cron/reminders',
+  bearerAuth({ token: process.env.CRON_SECRET || crypto.randomUUID() }),
+  async (c) => {
+    const now = new Date()
+    const { from, to } = digestWindow(now)
+    const sent = await remindBookings(
+      and(
+        eq(bookings.building_id, BUILDING_ID),
+        gte(bookings.slot_start, from),
+        lt(bookings.slot_start, to),
+      ),
+      now,
+    )
+    return c.json({ sent })
+  },
+)
+
 const auth = createMiddleware<Env>(async (c, next) => {
   const id = await sessionUserId(getCookie(c, 'sid'))
   const [u] = id ? await db.select().from(users).where(eq(users.id, id)) : []
@@ -132,7 +155,21 @@ app.get('/me', async (c) => {
     status: u.status,
     apartment: apt?.code ?? null,
     isAdmin: c.get('isAdmin'),
+    language: u.language,
   })
+})
+
+const languageBody = validator('json', (v, c) =>
+  USER_LANGUAGES.includes(v?.language)
+    ? { language: v.language as (typeof USER_LANGUAGES)[number] }
+    : c.json({ error: 'invalid_language' }, 400),
+)
+
+app.post('/me/language', languageBody, async (c) => {
+  const u = c.get('user')
+  const { language } = c.req.valid('json')
+  await db.update(users).set({ language }).where(eq(users.id, u.id))
+  return c.json({ ok: true })
 })
 
 app.get('/apartments', async (c) => {
@@ -267,6 +304,11 @@ app.post('/bookings', slotBody, async (c) => {
       return null
     })
     if (limit) return c.json({ error: limit }, 409)
+    if (remindsNow(slots[0], now))
+      await remindBookings(
+        and(eq(bookings.apartment_id, aptId), inArray(bookings.slot_start, slots)),
+        now,
+      )
     return c.json({ ok: true })
   } catch (e) {
     if (isDuplicate(e)) return c.json({ error: 'slot_taken' }, 409)
