@@ -7,7 +7,27 @@
     "subject": "Påminnelse om tvättstugan",
     "greeting": "Hej {{name}},",
     "intro": "Din bokning av tvättstugan för lägenhet {{apartment}}:",
-    "cancel": "Kan du inte komma? Avboka i appen så att någon annan kan använda tiden: {{url}}"
+    "cancel": "Kan du inte komma? Avboka i appen så att någon annan kan använda tiden: {{url}}",
+    "request": {
+      "subject": "Ny åtkomstbegäran",
+      "text": "{{resident}} har begärt åtkomst för lägenhet {{apartment}}. Godkänn eller avslå begäran i appen: {{url}}"
+    },
+    "approved": {
+      "subject": "Din åtkomst till tvättstugan är godkänd",
+      "text": "Du kan nu boka tvättider för lägenhet {{apartment}}: {{url}}"
+    },
+    "rejected": {
+      "subject": "Din begäran om tvättstugan avslogs",
+      "text": "Din begäran för lägenhet {{apartment}} avslogs. Du kan skicka en ny begäran i appen: {{url}}"
+    },
+    "revoked": {
+      "subject": "Din åtkomst till tvättstugan har återkallats",
+      "text": "Din åtkomst för lägenhet {{apartment}} har återkallats och dina kommande bokningar har avbokats. Du kan begära åtkomst igen i appen: {{url}}"
+    },
+    "cancelled": {
+      "subject": "Din tvättbokning avbokades",
+      "text": "En administratör avbokade din bokning {{when}}. Du kan boka en ny tid i appen: {{url}}"
+    }
   },
   "title": "Tvättstuga",
   "address": "Forstmestarinpiha 2, 02610 Espoo",

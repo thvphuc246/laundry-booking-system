@@ -7,7 +7,27 @@
     "subject": "Pesutupamuistutus",
     "greeting": "Hei {{name}},",
     "intro": "Pesutupavarauksesi asunnolle {{apartment}}:",
-    "cancel": "Etkö pääsekään? Peru varaus sovelluksessa, jotta joku muu voi käyttää vuoron: {{url}}"
+    "cancel": "Etkö pääsekään? Peru varaus sovelluksessa, jotta joku muu voi käyttää vuoron: {{url}}",
+    "request": {
+      "subject": "Uusi käyttöoikeuspyyntö",
+      "text": "{{resident}} pyysi käyttöoikeutta asuntoon {{apartment}}. Hyväksy tai hylkää pyyntö sovelluksessa: {{url}}"
+    },
+    "approved": {
+      "subject": "Pesutuvan käyttöoikeutesi on hyväksytty",
+      "text": "Voit nyt varata pesuvuoroja asunnolle {{apartment}}: {{url}}"
+    },
+    "rejected": {
+      "subject": "Pesutuvan käyttöoikeuspyyntösi hylättiin",
+      "text": "Pyyntösi asuntoon {{apartment}} hylättiin. Voit lähettää uuden pyynnön sovelluksessa: {{url}}"
+    },
+    "revoked": {
+      "subject": "Pesutuvan käyttöoikeutesi poistettiin",
+      "text": "Käyttöoikeutesi asuntoon {{apartment}} poistettiin ja tulevat varauksesi peruttiin. Voit pyytää käyttöoikeutta uudelleen sovelluksessa: {{url}}"
+    },
+    "cancelled": {
+      "subject": "Pesutupavarauksesi peruttiin",
+      "text": "Ylläpitäjä perui varauksesi {{when}}. Voit varata uuden vuoron sovelluksessa: {{url}}"
+    }
   },
   "title": "Pesutupa",
   "address": "Forstmestarinpiha 2, 02610 Espoo",
