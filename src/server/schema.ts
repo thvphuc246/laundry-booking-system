@@ -97,9 +97,13 @@ export const events = mysqlTable(
     apartment_id: uuid().references(() => apartments.id),
     booking_id: uuid().references(() => bookings.id),
     slot_start: datetime(),
+    processed_at: timestamp(),
     created_at: timestamp().notNull().defaultNow(),
   },
-  (t) => [index('events_created_at').on(t.created_at)],
+  (t) => [
+    index('events_created_at').on(t.created_at),
+    index('events_processed_at').on(t.processed_at),
+  ],
 )
 
 export type NewEvent = typeof events.$inferInsert

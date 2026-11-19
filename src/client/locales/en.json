@@ -7,7 +7,27 @@
     "subject": "Laundry room reminder",
     "greeting": "Hi {{name}},",
     "intro": "Your laundry room booking for apartment {{apartment}}:",
-    "cancel": "Can't make it? Cancel in the app so someone else can use the slot: {{url}}"
+    "cancel": "Can't make it? Cancel in the app so someone else can use the slot: {{url}}",
+    "request": {
+      "subject": "New access request",
+      "text": "{{resident}} requested access for apartment {{apartment}}. Approve or reject it in the app: {{url}}"
+    },
+    "approved": {
+      "subject": "Your laundry room access is approved",
+      "text": "You can now book laundry slots for apartment {{apartment}}: {{url}}"
+    },
+    "rejected": {
+      "subject": "Your laundry room request was rejected",
+      "text": "Your request for apartment {{apartment}} was rejected. You can request again in the app: {{url}}"
+    },
+    "revoked": {
+      "subject": "Your laundry room access was revoked",
+      "text": "Your access for apartment {{apartment}} was revoked and your upcoming bookings were cancelled. You can request access again in the app: {{url}}"
+    },
+    "cancelled": {
+      "subject": "Your laundry booking was cancelled",
+      "text": "An admin cancelled your booking on {{when}}. You can book another slot in the app: {{url}}"
+    }
   },
   "title": "Laundry room",
   "address": "Forstmestarinpiha 2, 02610 Espoo",

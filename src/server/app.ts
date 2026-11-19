@@ -25,7 +25,7 @@ import {
   weekStart,
 } from '../shared/rules.js'
 import { ADMINS, BUILDING_ID, db, isDuplicate } from './db.js'
-import { bookingEvent, recordEvents } from './events.js'
+import { bookingEvent, dispatchEvents, recordEvents } from './events.js'
 import { remindBookings } from './reminders.js'
 import {
   activeBooking,
@@ -123,7 +123,8 @@ app.get(
       ),
       now,
     )
-    return c.json({ sent })
+    const dispatched = await dispatchEvents(now)
+    return c.json({ sent, dispatched })
   },
 )
 
@@ -142,6 +143,11 @@ const admin = createMiddleware<Env>(async (c, next) => {
 })
 
 app.use('*', auth).use('/admin/*', admin)
+
+app.use('*', async (c, next) => {
+  await next()
+  if (c.req.method !== 'GET') await dispatchEvents(new Date())
+})
 
 app.get('/me', async (c) => {
   const u = c.get('user')
